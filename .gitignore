@@ -28,3 +28,7 @@ catalog.jsonl.gz
 /generalization*.json
 /cost_profile.json
 /memory_profile.json
+
+# sweep scratch at repo root; the kept copies live in results/
+/sweep*.json
+/ablation.json
