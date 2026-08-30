@@ -22,6 +22,7 @@ from collections import defaultdict
 
 from .config import Config
 from .dialog import SessionState
+from .replay import demote
 
 
 def _add(scores: dict[str, float], asins, amount: float) -> None:
@@ -75,6 +76,7 @@ def retrieve(index, state: SessionState, config: Config, top_k: int):
     doubled per-turn latency for no benefit.
     """
     scores = score_candidates(index, state, config)
+    demote(index, state, config, scores)
     return (
         _top_k(index, state, config, scores, top_k),
         _consistent(config, scores, config.eig_max_candidates),
@@ -82,7 +84,9 @@ def retrieve(index, state: SessionState, config: Config, top_k: int):
 
 
 def rank(index, state: SessionState, config: Config, top_k: int) -> list[str]:
-    return _top_k(index, state, config, score_candidates(index, state, config), top_k)
+    scores = score_candidates(index, state, config)
+    demote(index, state, config, scores)
+    return _top_k(index, state, config, scores, top_k)
 
 
 def _top_k(index, state: SessionState, config: Config, scores, top_k: int) -> list[str]:
@@ -107,7 +111,9 @@ def _top_k(index, state: SessionState, config: Config, scores, top_k: int) -> li
 
 def candidate_set(index, state: SessionState, config: Config, limit: int) -> list[str]:
     """The working candidate set the question estimator reasons over."""
-    return _consistent(config, score_candidates(index, state, config), limit)
+    scores = score_candidates(index, state, config)
+    demote(index, state, config, scores)
+    return _consistent(config, scores, limit)
 
 
 def _consistent(config: Config, scores, limit: int) -> list[str]:

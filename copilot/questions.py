@@ -22,6 +22,7 @@ from collections import defaultdict
 
 from .config import Config
 from .dialog import SessionState
+from .replay import predicted_answer
 from .simulator_model import ALLOWED_ATTRIBUTES
 
 QUESTION_TEMPLATES = {
@@ -40,25 +41,16 @@ QUESTION_TEMPLATES = {
 _CYCLE = ("feature", "material", "color", "style", "other")
 
 
-def _predicted_answer(index, asin: str, attribute: str, disclosed: set[str]) -> tuple[str, ...]:
-    """What the simulator would reveal for this attribute if `asin` were the target."""
-    matches: list[str] = []
-    for constraint in index.cards.get(asin, ()):
-        if constraint in disclosed:
-            continue
-        if attribute != "other" and index.attribute_of(constraint) != attribute:
-            continue
-        matches.append(constraint)
-        if len(matches) == 2:
-            break
-    return tuple(matches)
-
-
 def expected_remaining(index, candidates, attribute: str, disclosed: set[str]) -> float:
-    """Size-weighted mean group size after asking `attribute`. Lower is better."""
+    """Size-weighted mean group size after asking `attribute`. Lower is better.
+
+    `predicted_answer` is shared with `copilot.replay` on purpose: the estimator
+    that picks a question and the check that scores the answer must model the
+    simulator identically, or they can quietly disagree.
+    """
     groups: dict[tuple[str, ...], int] = defaultdict(int)
     for asin in candidates:
-        groups[_predicted_answer(index, asin, attribute, disclosed)] += 1
+        groups[predicted_answer(index, asin, attribute, disclosed)] += 1
     total = sum(groups.values())
     if not total:
         return 0.0
@@ -89,7 +81,10 @@ def choose_attribute(index, state: SessionState, config: Config, candidates) -> 
         return "feature" if "feature" in options else options[0]
 
     sample = candidates[: config.eig_max_candidates]
-    disclosed = state.seen
+    # The simulator's own `disclosed` set, not `seen`: mined guesses and the
+    # intent-override opening are in `seen` but were never actually disclosed,
+    # and counting them makes the estimator predict answers that cannot happen.
+    disclosed = state.disclosed
 
     best_attribute, best_score = None, float("inf")
     for attribute in options:

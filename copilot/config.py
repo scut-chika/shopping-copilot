@@ -84,6 +84,34 @@ class Config:
     removed the clean-set cost of mining entirely (L0 back to 0.9189) while
     keeping the paraphrase gains."""
 
+    use_replay_consistency: bool = True
+    """Replay the question/answer history against each candidate.
+
+    Membership scoring only asks whether a product's card *contains* what was
+    disclosed. The simulator's replies are deterministic, so we can ask the
+    sharper question -- would this product have given exactly this answer? --
+    which also uses what the customer did *not* say. See `copilot.replay`.
+    """
+
+    replay_penalty: float = 600.0
+    """Score charged per answer a candidate could not have produced.
+
+    Above `tier_weight * 0.5`, so one inconsistency also drops the candidate out
+    of the working set `_consistent` hands to the question estimator.
+    """
+
+    replay_pool: int = 1500
+    """How many top-scoring candidates to replay. >= `eig_max_candidates` so the
+    estimator never reasons over candidates that were never checked."""
+
+    replay_hard_filter: bool = False
+    """Delete inconsistent candidates instead of demoting them.
+
+    Off: this check leans harder on simulator determinism than anything else we
+    do, and the private simulator is not ours to inspect. A penalty costs rank
+    if it is ever wrong; a filter deletes the right answer.
+    """
+
     use_prior: bool = True
     """Popularity/quality prior used to break ties inside a tier."""
 

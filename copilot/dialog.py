@@ -33,6 +33,20 @@ class Constraint:
     mined: bool = False
 
 
+@dataclass(frozen=True)
+class AskEvidence:
+    """One question of ours and the answer it actually produced.
+
+    Enough to replay the exchange against any candidate: see `copilot.replay`.
+    `disclosed_before` is a snapshot taken *before* this turn's own disclosures,
+    because that is the state the simulator was in when it chose its answer.
+    """
+
+    attribute: str
+    revealed: tuple[str, ...]
+    disclosed_before: frozenset[str]
+
+
 @dataclass
 class SessionState:
     session_id: str
@@ -47,6 +61,16 @@ class SessionState:
     override_seen: bool = False
     transcript: list[str] = field(default_factory=list)
     last_recommendations: list[str] = field(default_factory=list)
+
+    disclosed: set[str] = field(default_factory=set)
+    """Mirror of the simulator's own `disclosed` set.
+
+    Deliberately *not* `seen`: that also holds mined guesses and unparsed free
+    text, none of which the simulator considers disclosed.  A false entry here
+    would make the replay skip a real card constraint and rule out the target.
+    """
+
+    evidence: list[AskEvidence] = field(default_factory=list)
 
     def add_constraint(
         self, text: str, known: bool, emphasized: bool = False, mined: bool = False
@@ -161,6 +185,10 @@ class DialogParser:
             self._ingest_opening(state, text)
             return
 
+        # Whatever we asked last turn is what this message answers: `ingest` runs
+        # before the turn's own question is chosen, so this is never stale.
+        pending = state.asked[-1] if state.asked else None
+
         match = RE_OVERRIDE.match(text)
         if match:
             state.override_seen = True
@@ -168,23 +196,47 @@ class DialogParser:
             # earlier evidence stays valid -- we re-weight rather than erase.
             for item, known in self._segment(match.group("body")):
                 state.add_constraint(item, known, emphasized=True)
+                if known:
+                    state.disclosed.add(item)
+            # Not evidence: the evaluator injects this turn on a fixed schedule
+            # instead of answering us, so it says nothing about our question.
             return
 
         match = RE_REPLY.match(text)
         if match:
-            for item, known in self._segment(match.group("body")):
+            segments = self._segment(match.group("body"))
+            before = frozenset(state.disclosed)
+            for item, known in segments:
                 state.add_constraint(item, known)
+                if known:
+                    state.disclosed.add(item)
+            # A partial parse means we do not really know what was said, and a
+            # wrong `revealed` would rule out the target.  Stay silent instead.
+            if pending and segments and all(known for _, known in segments):
+                state.evidence.append(
+                    AskEvidence(pending, tuple(item for item, _ in segments), before)
+                )
             return
 
         match = RE_BOUNDARY.match(text)
         if match:
             state.boundary_seen = True
             state.dead_attributes.add(match.group("attr"))
+            # Carries no information: the evaluator fires this once per boundary
+            # session whatever the target's card looks like.  Treating it as a
+            # real refusal excluded the true target in 8% of turn-states.
             return
 
         match = RE_NO_EXTRA.match(text)
         if match:
-            state.dead_attributes.add(match.group("attr"))
+            attribute = match.group("attr")
+            state.dead_attributes.add(attribute)
+            # This one *is* evidence: the target has no undisclosed constraint of
+            # this class, which rules out every candidate that still has one.
+            if state.asked:
+                state.evidence.append(
+                    AskEvidence(attribute, (), frozenset(state.disclosed))
+                )
             return
 
         if RE_NUDGE.match(text):
@@ -213,6 +265,8 @@ class DialogParser:
             state.category = category.strip()
             for item, known in self._segment(body):
                 state.add_constraint(item, known)
+                if known:
+                    state.disclosed.add(item)
             return
 
         category, remainder = self._split_category(rest)
@@ -221,3 +275,7 @@ class DialogParser:
         if remainder:
             for item, known in self._segment(remainder):
                 state.add_constraint(item, known)
+                # Deliberately not disclosed: the evaluator speaks this opening
+                # value without adding it to its own `disclosed` set, so the
+                # simulator may legitimately reveal it again later.
+
