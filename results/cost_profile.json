@@ -1,13 +1,13 @@
 {
-  "startup_seconds": 18.44,
+  "startup_seconds": 16.34,
   "index_peak_memory_mb": null,
-  "turns_measured": 395,
+  "turns_measured": 461,
   "latency_ms": {
-    "mean": 64.28,
-    "p50": 61.07,
-    "p95": 123.38,
-    "p99": 144.79,
-    "max": 342.52
+    "mean": 66.36,
+    "p50": 64.15,
+    "p95": 117.36,
+    "p99": 149.21,
+    "max": 287.11
   },
   "llm_calls": 0,
   "prompt_tokens": 0,

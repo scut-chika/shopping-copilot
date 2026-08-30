@@ -97,9 +97,15 @@ def main() -> None:
     parser.add_argument("--catalog", default="data/catalog.jsonl")
     parser.add_argument("--dataset", default="data/public_set.jsonl")
     parser.add_argument("--output", default="robustness.json")
+    parser.add_argument(
+        "--sessions", type=int, default=None,
+        help="cap the session count -- used when a variant costs money per turn",
+    )
     args = parser.parse_args()
 
     samples = load_samples(args.dataset)
+    if args.sessions:
+        samples = samples[: args.sessions]
     catalog_ids, categories, products = load_catalog(args.catalog)
     config = _config_from_env()
     agent = ShoppingCopilot(args.catalog, config)

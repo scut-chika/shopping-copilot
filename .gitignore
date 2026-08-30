@@ -32,3 +32,4 @@ catalog.jsonl.gz
 # sweep scratch at repo root; the kept copies live in results/
 /sweep*.json
 /ablation.json
+/rb_*.json
