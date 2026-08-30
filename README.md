@@ -361,7 +361,7 @@ See **[RUN.md](RUN.md)** for the one-page version. Short form:
 ```bash
 curl -L -o catalog.jsonl.gz \
   https://github.com/TechJam2026/techjam-conversational-search/releases/download/participant-kit/catalog.jsonl.gz
-sha256sum -c SHA256SUMS
+sha256sum -c --ignore-missing SHA256SUMS   # SHA256SUMS also lists the kit zip, which we do not need
 gzip -dk catalog.jsonl.gz && mv catalog.jsonl data/catalog.jsonl
 
 python -m evaluator.local_evaluator     # -> results.json, TechnicalScore 0.916014

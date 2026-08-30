@@ -23,7 +23,7 @@ The 50k-product catalog is a release asset and is not committed (58 MB raw).
 ```bash
 curl -L -o catalog.jsonl.gz \
   https://github.com/TechJam2026/techjam-conversational-search/releases/download/participant-kit/catalog.jsonl.gz
-sha256sum -c SHA256SUMS
+sha256sum -c --ignore-missing SHA256SUMS   # SHA256SUMS also lists the kit zip, which we do not need
 gzip -dk catalog.jsonl.gz && mv catalog.jsonl data/catalog.jsonl
 ```
 
@@ -83,6 +83,13 @@ RSS is the number that matters for a memory cap.
 The index build happens once in `Agent.__init__`, not per session or per turn.
 
 Reproduce with `python tools/memcheck.py` and `python tools/profile_cost.py`.
+
+## Verified from a clean clone
+
+This exact sequence was run against a fresh `git clone` of the public repository
+on 30 Aug 2026 and reproduced `recommended_technical_score` **0.916014**, with
+all 16 tests passing. If it does not reproduce for you, that is a bug and we want
+to know.
 
 ## Mapping to the recommended submission layout
 
