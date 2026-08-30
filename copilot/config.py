@@ -133,14 +133,31 @@ class Config:
     either way.
     """
 
-    gate_candidate_threshold: int = 10
-    """Pool size above which we are not confident enough to show a full list."""
+    gate_candidate_threshold: int = 1
+    """Pool size above which we are not confident enough to show a full list.
 
-    gate_list_size: int = 3
-    """How many to show while gated. Never zero: a shortlist plus a question is
-    a real answer, an empty list is a wasted turn."""
+    At 1 this reads: commit only when the dialogue has left exactly one
+    candidate standing. Swept over {1, 3, 5, 20} x {1, 2, 3, 5} x turn limits;
+    the whole surface sits between 0.9570 and 0.9614, so this is a flat optimum
+    rather than a knife edge.
+    """
 
-    gate_max_turn: int = 4
+    gate_list_size: int = 1
+    """How many to show while gated.
+
+    One dominates the sweep (0.9614 against 0.9477 at two and 0.9411 at three),
+    and the reason is structural rather than tuned: a hit ends the session at
+    whatever rank it landed on, so showing exactly our best guess means every
+    hit we do get is a rank-1 hit.
+
+    Deliberately not zero, which the metric would reward further. An assistant
+    that answers a shopper with an empty list and a question is not doing the
+    job; one that answers "here is my best guess -- if that is not it, what
+    material did you want?" is. That line is a product judgement, not a
+    measurement, and it is where we stopped.
+    """
+
+    gate_max_turn: int = 3
     """Stop gating after this turn.
 
     Without a stop, sessions whose pool never converges get gated for all ten
@@ -199,6 +216,16 @@ class Config:
     # ---- question strategy ------------------------------------------------
     question_strategy: str = "eig"
     """One of: "eig" (expected information gain), "other", "cycle", "none"."""
+
+    question_objective: str = "expected_size"
+    """What the question estimator optimises: "expected_size" or "convergence".
+
+    Minimising the expected surviving candidate count is the textbook objective,
+    but it is not what the agent is paid for once a confidence gate sits in
+    front of the recommendations: what matters then is the chance of dropping
+    *under the gate's threshold* on this answer, which prefers a question that
+    isolates candidates over one that splits them evenly.
+    """
 
     allow_other_arm: bool = True
     """Whether the wildcard `other` attribute may be chosen by the estimator."""
