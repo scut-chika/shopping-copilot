@@ -23,7 +23,8 @@ catalog.jsonl.gz
 # scratch outputs at the repo root; the committed evidence lives in results/
 /results.json
 /results_*.json
-/ablation.json
-/robustness_*.json
-/generalization.json
+/ablation*.json
+/robustness*.json
+/generalization*.json
 /cost_profile.json
+/memory_profile.json
