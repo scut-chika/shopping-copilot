@@ -246,14 +246,23 @@ class Config:
     allow_other_arm: bool = True
     """Whether the wildcard `other` attribute may be chosen by the estimator."""
 
-    eig_uses_disclosed: bool = True
-    """Feed the question estimator the simulator's `disclosed` set, not `seen`.
+    eig_disclosed_source: str = "adaptive"
+    """Which "already revealed" set the question estimator reasons from:
+    "disclosed", "seen", or "adaptive".
 
-    `seen` also holds mined guesses and the intent-override opening value, which
-    were never actually disclosed; counting them makes the estimator predict
-    answers the simulator cannot give. `disclosed` is the faithful mirror -- but
-    it is only populated by turns that parse, so this flag exists to measure
-    what the stricter set costs when parsing is failing.
+    `disclosed` is the faithful mirror of the simulator's own set and is exactly
+    right while we can read the conversation. But it is only populated by turns
+    that *parse*, so under paraphrase it stays empty, the estimator concludes
+    nothing has been revealed, and it spends turns asking for what the customer
+    already told us. That cost 0.041 at L3 and 0.025 at L4.
+
+    `seen` is the opposite trade: it over-counts (mined guesses, the
+    intent-override opening, unparsed free text) but it keeps accumulating when
+    parsing fails.
+
+    "adaptive" picks per session on `parse_failures`, which is precisely the
+    condition that separates the two regimes: exact while we are following the
+    conversation, resilient once we are not.
     """
 
     eig_max_candidates: int = 1200

@@ -121,10 +121,15 @@ def choose_attribute(index, state: SessionState, config: Config, candidates) -> 
         return "feature" if "feature" in options else options[0]
 
     sample = candidates[: config.eig_max_candidates]
-    # The simulator's own `disclosed` set, not `seen`: mined guesses and the
-    # intent-override opening are in `seen` but were never actually disclosed,
-    # and counting them makes the estimator predict answers that cannot happen.
-    disclosed = state.disclosed if config.eig_uses_disclosed else state.seen
+    # `disclosed` mirrors the simulator exactly, but only while turns parse: it
+    # excludes mined guesses and the intent-override opening, neither of which
+    # the simulator considers revealed. Once we stop parsing it stops filling,
+    # so fall back to `seen` rather than conclude nothing has been said.
+    source = config.eig_disclosed_source
+    if source == "seen" or (source == "adaptive" and state.parse_failures):
+        disclosed = state.seen
+    else:
+        disclosed = state.disclosed
 
     converging = config.question_objective == "convergence"
     best_attribute, best_score = None, None
