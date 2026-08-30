@@ -185,7 +185,7 @@ data was added.
 
 ## Links
 
-- **Repository:** {{ GITHUB_URL }}
+- **Repository:** https://github.com/scut-chika/shopping-copilot
 - **Demo video:** {{ YOUTUBE_URL }}
 
 ## Team

@@ -7,6 +7,8 @@ whichever clarification is expected to disambiguate the most candidates.
 
 **No LLM. No network. No third-party dependencies. CPU only, $0.00.**
 
+Repository: <https://github.com/scut-chika/shopping-copilot>
+
 The submission rules note that *"for official final scoring, organizer policy may
 disable network access"*. This agent is built so that restriction changes nothing
 about how it runs — a property pinned by a test, not just claimed.
