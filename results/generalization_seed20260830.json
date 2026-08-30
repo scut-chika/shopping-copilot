@@ -3,70 +3,70 @@
   "public": {
     "n": 200,
     "hit_rate": 1.0,
-    "mrr": 0.794573,
-    "mttc": 1.975,
-    "efficiency": 0.9025,
-    "technical_score": 0.918872,
+    "mrr": 0.961359,
+    "mttc": 2.305,
+    "efficiency": 0.8695,
+    "technical_score": 0.962308,
     "by_scenario": {
       "boundary": {
         "n": 10,
         "hit_rate": 1.0,
-        "mrr": 0.845833,
-        "mttc": 2.5
+        "mrr": 1.0,
+        "mttc": 2.7
       },
       "browsing": {
         "n": 80,
         "hit_rate": 1.0,
-        "mrr": 0.742986,
-        "mttc": 1.7875
+        "mrr": 0.954216,
+        "mttc": 2.2125
       },
       "buying": {
         "n": 80,
         "hit_rate": 1.0,
-        "mrr": 0.784767,
-        "mttc": 1.4875
+        "mrr": 0.968452,
+        "mttc": 1.85
       },
       "intent_override": {
         "n": 30,
         "hit_rate": 1.0,
-        "mrr": 0.941204,
-        "mttc": 3.6
+        "mrr": 0.948611,
+        "mttc": 3.633333
       }
     }
   },
   "holdout": {
     "n": 800,
-    "hit_rate": 0.98125,
-    "mrr": 0.741251,
-    "mttc": 2.28375,
-    "efficiency": 0.871625,
-    "technical_score": 0.887325,
+    "hit_rate": 0.9775,
+    "mrr": 0.918813,
+    "mttc": 2.6625,
+    "efficiency": 0.83375,
+    "technical_score": 0.931144,
     "by_scenario": {
       "boundary": {
         "n": 40,
         "hit_rate": 0.95,
-        "mrr": 0.6787,
-        "mttc": 3.475
+        "mrr": 0.817946,
+        "mttc": 3.725
       },
       "browsing": {
         "n": 320,
-        "hit_rate": 0.990625,
-        "mrr": 0.747965,
-        "mttc": 2.075
+        "hit_rate": 0.984375,
+        "mrr": 0.954439,
+        "mttc": 2.46875
       },
       "buying": {
         "n": 320,
         "hit_rate": 0.971875,
-        "mrr": 0.687999,
-        "mttc": 1.846875
+        "mrr": 0.901722,
+        "mttc": 2.3125
       },
       "intent_override": {
         "n": 120,
-        "hit_rate": 0.991667,
-        "mrr": 0.886204,
-        "mttc": 3.608333
+        "hit_rate": 0.983333,
+        "mrr": 0.903009,
+        "mttc": 3.758333
       }
     }
   },
-  "gap": -0.031547
+  "gap": -0.031164
 }

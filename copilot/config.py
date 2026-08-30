@@ -157,6 +157,22 @@ class Config:
     measurement, and it is where we stopped.
     """
 
+    gate_needs_clean_parse: bool = False
+    """Stop gating once a turn fails to parse as a known template.
+
+    A falsified hypothesis, kept because the result is worth knowing. The
+    reasoning was that withholding the list bets on one more question settling
+    the session, and that under paraphrase the bet is false -- the pool is wide
+    because we cannot read the customer, not because we are one answer away.
+
+    Measurement disagreed. Switching the gate off under paraphrase *cost* score
+    at every level it was supposed to help: L1 0.8482 -> 0.8147, L2 0.8465 ->
+    0.8140, L3 0.8110 -> 0.7875, and it recovered only 0.005 at L4. MRR at L1
+    fell from 0.8329 to 0.6929. Even on a half-read transcript the ranking is
+    good enough that committing to one guess beats padding out ten, so the gate
+    earns its keep exactly where it looked most dangerous.
+    """
+
     gate_max_turn: int = 3
     """Stop gating after this turn.
 
@@ -217,7 +233,7 @@ class Config:
     question_strategy: str = "eig"
     """One of: "eig" (expected information gain), "other", "cycle", "none"."""
 
-    question_objective: str = "expected_size"
+    question_objective: str = "convergence"
     """What the question estimator optimises: "expected_size" or "convergence".
 
     Minimising the expected surviving candidate count is the textbook objective,
@@ -229,6 +245,16 @@ class Config:
 
     allow_other_arm: bool = True
     """Whether the wildcard `other` attribute may be chosen by the estimator."""
+
+    eig_uses_disclosed: bool = True
+    """Feed the question estimator the simulator's `disclosed` set, not `seen`.
+
+    `seen` also holds mined guesses and the intent-override opening value, which
+    were never actually disclosed; counting them makes the estimator predict
+    answers the simulator cannot give. `disclosed` is the faithful mirror -- but
+    it is only populated by turns that parse, so this flag exists to measure
+    what the stricter set costs when parsing is failing.
+    """
 
     eig_max_candidates: int = 1200
     """Above this candidate count, EIG is estimated on a sample this size."""

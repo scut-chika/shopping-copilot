@@ -1,0 +1,50 @@
+[
+  {
+    "question_objective": "convergence",
+    "gate_max_turn": 3,
+    "technical_score": 0.962308,
+    "hit_rate": 1.0,
+    "mrr": 0.961359,
+    "mttc": 2.305
+  },
+  {
+    "question_objective": "expected_size",
+    "gate_max_turn": 3,
+    "technical_score": 0.961408,
+    "hit_rate": 1.0,
+    "mrr": 0.958026,
+    "mttc": 2.3
+  },
+  {
+    "question_objective": "expected_size",
+    "gate_max_turn": 4,
+    "technical_score": 0.960966,
+    "hit_rate": 1.0,
+    "mrr": 0.96122,
+    "mttc": 2.37
+  },
+  {
+    "question_objective": "convergence",
+    "gate_max_turn": 4,
+    "technical_score": 0.960841,
+    "hit_rate": 1.0,
+    "mrr": 0.960804,
+    "mttc": 2.37
+  },
+  {
+    "question_objective": "expected_size",
+    "gate_max_turn": 2,
+    "technical_score": 0.959754,
+    "hit_rate": 1.0,
+    "mrr": 0.948512,
+    "mttc": 2.24
+  },
+  {
+    "question_objective": "convergence",
+    "gate_max_turn": 2,
+    "technical_score": 0.959164,
+    "hit_rate": 1.0,
+    "mrr": 0.946548,
+    "mttc": 2.24
+  }
+]

@@ -3,70 +3,70 @@
   "public": {
     "n": 200,
     "hit_rate": 1.0,
-    "mrr": 0.794573,
-    "mttc": 1.975,
-    "efficiency": 0.9025,
-    "technical_score": 0.918872,
+    "mrr": 0.961359,
+    "mttc": 2.305,
+    "efficiency": 0.8695,
+    "technical_score": 0.962308,
     "by_scenario": {
       "boundary": {
         "n": 10,
         "hit_rate": 1.0,
-        "mrr": 0.845833,
-        "mttc": 2.5
+        "mrr": 1.0,
+        "mttc": 2.7
       },
       "browsing": {
         "n": 80,
         "hit_rate": 1.0,
-        "mrr": 0.742986,
-        "mttc": 1.7875
+        "mrr": 0.954216,
+        "mttc": 2.2125
       },
       "buying": {
         "n": 80,
         "hit_rate": 1.0,
-        "mrr": 0.784767,
-        "mttc": 1.4875
+        "mrr": 0.968452,
+        "mttc": 1.85
       },
       "intent_override": {
         "n": 30,
         "hit_rate": 1.0,
-        "mrr": 0.941204,
-        "mttc": 3.6
+        "mrr": 0.948611,
+        "mttc": 3.633333
       }
     }
   },
   "holdout": {
     "n": 800,
     "hit_rate": 0.97375,
-    "mrr": 0.718814,
-    "mttc": 2.345,
-    "efficiency": 0.8655,
-    "technical_score": 0.875619,
+    "mrr": 0.920812,
+    "mttc": 2.7025,
+    "efficiency": 0.82975,
+    "technical_score": 0.929069,
     "by_scenario": {
       "boundary": {
         "n": 40,
         "hit_rate": 0.95,
-        "mrr": 0.649792,
-        "mttc": 3.3
+        "mrr": 0.864583,
+        "mttc": 3.7
       },
       "browsing": {
         "n": 320,
         "hit_rate": 0.96875,
-        "mrr": 0.669084,
-        "mttc": 2.33125
+        "mrr": 0.912795,
+        "mttc": 2.7
       },
       "buying": {
         "n": 320,
         "hit_rate": 0.978125,
-        "mrr": 0.713738,
-        "mttc": 1.75
+        "mrr": 0.93803,
+        "mttc": 2.190625
       },
       "intent_override": {
         "n": 120,
         "hit_rate": 0.983333,
-        "mrr": 0.887973,
-        "mttc": 3.65
+        "mrr": 0.915023,
+        "mttc": 3.741667
       }
     }
   },
-  "gap": -0.043253
+  "gap": -0.033239
 }

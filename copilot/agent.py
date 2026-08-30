@@ -94,7 +94,7 @@ class ShoppingCopilot:
             attribute = choose_attribute(self.index, state, self.config, candidates)
             if attribute is not None:
                 state.asked.append(attribute)
-                recommendations = self._gate(recommendations, candidates, turn)
+                recommendations = self._gate(state, recommendations, candidates, turn)
             message = phrase(attribute, len(candidates))
         else:
             message = "Here are my best matches based on everything you have told me."
@@ -128,7 +128,7 @@ class ShoppingCopilot:
         ordered = self._llm().rerank(state.dialog_text(), described)
         return (ordered or deep)[:top_k]
 
-    def _gate(self, recommendations: list[str], candidates, turn: int) -> list[str]:
+    def _gate(self, state: SessionState, recommendations: list[str], candidates, turn: int) -> list[str]:
         """Shorten the list while the candidate pool is still overloaded.
 
         The evaluator ends the session on *any* hit, so a lucky low-rank hit on a
@@ -143,6 +143,11 @@ class ShoppingCopilot:
         if not config.use_confidence_gate:
             return recommendations
         if turn > config.gate_max_turn:
+            return recommendations
+        if config.gate_needs_clean_parse and state.parse_failures:
+            # We are not following this conversation. Holding back the list is
+            # premised on one more question settling things, and a question we
+            # cannot read the answer to settles nothing -- so pay out instead.
             return recommendations
         if len(candidates) <= config.gate_candidate_threshold:
             return recommendations

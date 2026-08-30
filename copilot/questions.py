@@ -124,7 +124,7 @@ def choose_attribute(index, state: SessionState, config: Config, candidates) -> 
     # The simulator's own `disclosed` set, not `seen`: mined guesses and the
     # intent-override opening are in `seen` but were never actually disclosed,
     # and counting them makes the estimator predict answers that cannot happen.
-    disclosed = state.disclosed
+    disclosed = state.disclosed if config.eig_uses_disclosed else state.seen
 
     converging = config.question_objective == "convergence"
     best_attribute, best_score = None, None

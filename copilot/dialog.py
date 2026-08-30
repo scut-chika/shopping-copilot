@@ -72,6 +72,15 @@ class SessionState:
 
     evidence: list[AskEvidence] = field(default_factory=list)
 
+    parse_failures: int = 0
+    """Turns we could not read as any known template.
+
+    A health signal for the strategies that assume we are following the
+    conversation. Non-zero means the customer is being worded in a way we do not
+    recognise, and anything premised on "one more question will settle this" no
+    longer holds.
+    """
+
     def add_constraint(
         self, text: str, known: bool, emphasized: bool = False, mined: bool = False
     ) -> None:
@@ -270,11 +279,13 @@ class DialogParser:
 
         # Unrecognised phrasing (e.g. organizer paraphrasing): keep it as a
         # free-text constraint so BM25 can still use it.
+        state.parse_failures += 1
         state.add_constraint(text, known=False)
 
     def _ingest_opening(self, state: SessionState, text: str) -> None:
         if not text.startswith(LOOKING_PREFIX):
             state.scenario = "unknown"
+            state.parse_failures += 1
             state.add_constraint(text, known=False)
             return
 

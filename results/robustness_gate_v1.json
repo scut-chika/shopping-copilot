@@ -1,0 +1,172 @@
+{
+  "L0": {
+    "n": 200,
+    "hit_rate": 1.0,
+    "mrr": 0.961359,
+    "mttc": 2.305,
+    "efficiency": 0.8695,
+    "technical_score": 0.962308,
+    "by_scenario": {
+      "boundary": {
+        "n": 10,
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "mttc": 2.7
+      },
+      "browsing": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.954216,
+        "mttc": 2.2125
+      },
+      "buying": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.968452,
+        "mttc": 1.85
+      },
+      "intent_override": {
+        "n": 30,
+        "hit_rate": 1.0,
+        "mrr": 0.948611,
+        "mttc": 3.633333
+      }
+    }
+  },
+  "L1": {
+    "n": 200,
+    "hit_rate": 0.895,
+    "mrr": 0.832867,
+    "mttc": 3.46,
+    "efficiency": 0.754,
+    "technical_score": 0.84816,
+    "by_scenario": {
+      "boundary": {
+        "n": 10,
+        "hit_rate": 0.9,
+        "mrr": 0.833333,
+        "mttc": 4.0
+      },
+      "browsing": {
+        "n": 80,
+        "hit_rate": 0.9,
+        "mrr": 0.795362,
+        "mttc": 3.3625
+      },
+      "buying": {
+        "n": 80,
+        "hit_rate": 0.8625,
+        "mrr": 0.840625,
+        "mttc": 3.325
+      },
+      "intent_override": {
+        "n": 30,
+        "hit_rate": 0.966667,
+        "mrr": 0.912037,
+        "mttc": 3.9
+      }
+    }
+  },
+  "L2": {
+    "n": 200,
+    "hit_rate": 0.895,
+    "mrr": 0.829117,
+    "mttc": 3.485,
+    "efficiency": 0.7515,
+    "technical_score": 0.846535,
+    "by_scenario": {
+      "boundary": {
+        "n": 10,
+        "hit_rate": 0.9,
+        "mrr": 0.833333,
+        "mttc": 4.0
+      },
+      "browsing": {
+        "n": 80,
+        "hit_rate": 0.9,
+        "mrr": 0.795362,
+        "mttc": 3.3875
+      },
+      "buying": {
+        "n": 80,
+        "hit_rate": 0.8625,
+        "mrr": 0.83125,
+        "mttc": 3.3625
+      },
+      "intent_override": {
+        "n": 30,
+        "hit_rate": 0.966667,
+        "mrr": 0.912037,
+        "mttc": 3.9
+      }
+    }
+  },
+  "L3": {
+    "n": 200,
+    "hit_rate": 0.87,
+    "mrr": 0.770373,
+    "mttc": 3.755,
+    "efficiency": 0.7245,
+    "technical_score": 0.811012,
+    "by_scenario": {
+      "boundary": {
+        "n": 10,
+        "hit_rate": 0.9,
+        "mrr": 0.667619,
+        "mttc": 4.3
+      },
+      "browsing": {
+        "n": 80,
+        "hit_rate": 0.85,
+        "mrr": 0.730987,
+        "mttc": 3.775
+      },
+      "buying": {
+        "n": 80,
+        "hit_rate": 0.85,
+        "mrr": 0.769479,
+        "mttc": 3.6125
+      },
+      "intent_override": {
+        "n": 30,
+        "hit_rate": 0.966667,
+        "mrr": 0.912037,
+        "mttc": 3.9
+      }
+    }
+  },
+  "L4": {
+    "n": 200,
+    "hit_rate": 0.785,
+    "mrr": 0.647823,
+    "mttc": 4.61,
+    "efficiency": 0.639,
+    "technical_score": 0.714647,
+    "by_scenario": {
+      "boundary": {
+        "n": 10,
+        "hit_rate": 0.9,
+        "mrr": 0.665833,
+        "mttc": 4.3
+      },
+      "browsing": {
+        "n": 80,
+        "hit_rate": 0.75,
+        "mrr": 0.578557,
+        "mttc": 4.7625
+      },
+      "buying": {
+        "n": 80,
+        "hit_rate": 0.75,
+        "mrr": 0.618884,
+        "mttc": 4.675
+      },
+      "intent_override": {
+        "n": 30,
+        "hit_rate": 0.933333,
+        "mrr": 0.903704,
+        "mttc": 4.133333
+      }
+    }
+  }
+}
