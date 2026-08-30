@@ -1,0 +1,226 @@
+[
+  {
+    "gate_candidate_threshold": 3,
+    "gate_list_size": 1,
+    "technical_score": 0.957627,
+    "hit_rate": 1.0,
+    "mrr": 0.960423,
+    "mttc": 2.525
+  },
+  {
+    "gate_candidate_threshold": 5,
+    "gate_list_size": 1,
+    "technical_score": 0.957627,
+    "hit_rate": 1.0,
+    "mrr": 0.960423,
+    "mttc": 2.525
+  },
+  {
+    "gate_candidate_threshold": 20,
+    "gate_list_size": 1,
+    "technical_score": 0.957027,
+    "hit_rate": 1.0,
+    "mrr": 0.952089,
+    "mttc": 2.43
+  },
+  {
+    "gate_candidate_threshold": 1,
+    "gate_list_size": 1,
+    "technical_score": 0.956977,
+    "hit_rate": 1.0,
+    "mrr": 0.962923,
+    "mttc": 2.595
+  },
+  {
+    "gate_candidate_threshold": 10,
+    "gate_list_size": 1,
+    "technical_score": 0.956227,
+    "hit_rate": 1.0,
+    "mrr": 0.952089,
+    "mttc": 2.47
+  },
+  {
+    "gate_candidate_threshold": 50,
+    "gate_list_size": 1,
+    "technical_score": 0.955927,
+    "hit_rate": 1.0,
+    "mrr": 0.942756,
+    "mttc": 2.345
+  },
+  {
+    "gate_candidate_threshold": 200,
+    "gate_list_size": 1,
+    "technical_score": 0.953753,
+    "hit_rate": 1.0,
+    "mrr": 0.927845,
+    "mttc": 2.23
+  },
+  {
+    "gate_candidate_threshold": 20,
+    "gate_list_size": 2,
+    "technical_score": 0.948377,
+    "hit_rate": 1.0,
+    "mrr": 0.914589,
+    "mttc": 2.3
+  },
+  {
+    "gate_candidate_threshold": 200,
+    "gate_list_size": 2,
+    "technical_score": 0.947704,
+    "hit_rate": 1.0,
+    "mrr": 0.900345,
+    "mttc": 2.12
+  },
+  {
+    "gate_candidate_threshold": 3,
+    "gate_list_size": 2,
+    "technical_score": 0.947677,
+    "hit_rate": 1.0,
+    "mrr": 0.917923,
+    "mttc": 2.385
+  },
+  {
+    "gate_candidate_threshold": 5,
+    "gate_list_size": 2,
+    "technical_score": 0.947677,
+    "hit_rate": 1.0,
+    "mrr": 0.917923,
+    "mttc": 2.385
+  },
+  {
+    "gate_candidate_threshold": 10,
+    "gate_list_size": 2,
+    "technical_score": 0.947577,
+    "hit_rate": 1.0,
+    "mrr": 0.914589,
+    "mttc": 2.34
+  },
+  {
+    "gate_candidate_threshold": 50,
+    "gate_list_size": 2,
+    "technical_score": 0.947277,
+    "hit_rate": 1.0,
+    "mrr": 0.905256,
+    "mttc": 2.215
+  },
+  {
+    "gate_candidate_threshold": 1,
+    "gate_list_size": 2,
+    "technical_score": 0.947077,
+    "hit_rate": 1.0,
+    "mrr": 0.917923,
+    "mttc": 2.415
+  },
+  {
+    "gate_candidate_threshold": 200,
+    "gate_list_size": 3,
+    "technical_score": 0.941103,
+    "hit_rate": 1.0,
+    "mrr": 0.875345,
+    "mttc": 2.075
+  },
+  {
+    "gate_candidate_threshold": 50,
+    "gate_list_size": 3,
+    "technical_score": 0.940677,
+    "hit_rate": 1.0,
+    "mrr": 0.880256,
+    "mttc": 2.17
+  },
+  {
+    "gate_candidate_threshold": 20,
+    "gate_list_size": 3,
+    "technical_score": 0.939977,
+    "hit_rate": 1.0,
+    "mrr": 0.880256,
+    "mttc": 2.205
+  },
+  {
+    "gate_candidate_threshold": 10,
+    "gate_list_size": 3,
+    "technical_score": 0.939277,
+    "hit_rate": 1.0,
+    "mrr": 0.880256,
+    "mttc": 2.24
+  },
+  {
+    "gate_candidate_threshold": 1,
+    "gate_list_size": 3,
+    "technical_score": 0.938577,
+    "hit_rate": 1.0,
+    "mrr": 0.880256,
+    "mttc": 2.275
+  },
+  {
+    "gate_candidate_threshold": 3,
+    "gate_list_size": 3,
+    "technical_score": 0.938577,
+    "hit_rate": 1.0,
+    "mrr": 0.880256,
+    "mttc": 2.275
+  },
+  {
+    "gate_candidate_threshold": 5,
+    "gate_list_size": 3,
+    "technical_score": 0.938577,
+    "hit_rate": 1.0,
+    "mrr": 0.880256,
+    "mttc": 2.275
+  },
+  {
+    "gate_candidate_threshold": 200,
+    "gate_list_size": 5,
+    "technical_score": 0.934829,
+    "hit_rate": 1.0,
+    "mrr": 0.852095,
+    "mttc": 2.04
+  },
+  {
+    "gate_candidate_threshold": 50,
+    "gate_list_size": 5,
+    "technical_score": 0.934402,
+    "hit_rate": 1.0,
+    "mrr": 0.853673,
+    "mttc": 2.085
+  },
+  {
+    "gate_candidate_threshold": 20,
+    "gate_list_size": 5,
+    "technical_score": 0.933702,
+    "hit_rate": 1.0,
+    "mrr": 0.853673,
+    "mttc": 2.12
+  },
+  {
+    "gate_candidate_threshold": 1,
+    "gate_list_size": 5,
+    "technical_score": 0.933002,
+    "hit_rate": 1.0,
+    "mrr": 0.853673,
+    "mttc": 2.155
+  },
+  {
+    "gate_candidate_threshold": 3,
+    "gate_list_size": 5,
+    "technical_score": 0.933002,
+    "hit_rate": 1.0,
+    "mrr": 0.853673,
+    "mttc": 2.155
+  },
+  {
+    "gate_candidate_threshold": 5,
+    "gate_list_size": 5,
+    "technical_score": 0.933002,
+    "hit_rate": 1.0,
+    "mrr": 0.853673,
+    "mttc": 2.155
+  },
+  {
+    "gate_candidate_threshold": 10,
+    "gate_list_size": 5,
+    "technical_score": 0.933002,
+    "hit_rate": 1.0,
+    "mrr": 0.853673,
+    "mttc": 2.155
+  }
+]

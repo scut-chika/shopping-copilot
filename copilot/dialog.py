@@ -150,7 +150,9 @@ class DialogParser:
 
     # ---------------------------------------------------------------- public
 
-    def ingest(self, state: SessionState, message: str, turn: int, config=None) -> None:
+    def ingest(
+        self, state: SessionState, message: str, turn: int, config=None, llm=None
+    ) -> None:
         text = (message or "").strip()
         state.transcript.append(text)
         if not text:
@@ -160,6 +162,30 @@ class DialogParser:
         parsed_something = sum(1 for c in state.constraints if c.known) > known_before
         if not (parsed_something and getattr(config, "mining_only_when_parse_fails", False)):
             self._mine(state, text, config)
+            if llm is not None and not parsed_something:
+                self._llm_parse(state, text, config, llm)
+
+    def _llm_parse(self, state: SessionState, text: str, config, llm) -> None:
+        """Last resort when the templates missed: ask which constraint was meant.
+
+        Only runs on turns the parser could not read, and only chooses among
+        constraints that already exist in the catalog -- the model narrows a
+        shortlist, it never introduces a string. A miss leaves the mined
+        evidence exactly as it was.
+        """
+        shortlist = self.index.mine_constraints(
+            text,
+            min_overlap=0.25,
+            limit=config.mining_candidates,
+            max_results=16,
+            min_tokens=config.mining_min_tokens,
+        )
+        if not shortlist:
+            return
+        chosen = llm.select_constraint(text, shortlist)
+        if chosen and chosen in self.index.card_index:
+            # Full weight: unlike a mined guess this one was adjudicated.
+            state.add_constraint(chosen, known=True)
 
     def _mine(self, state: SessionState, text: str, config) -> None:
         """Template-independent salvage.

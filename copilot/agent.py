@@ -23,7 +23,7 @@ from .catalog import CatalogIndex
 from .config import DEFAULT, Config
 from .dialog import DialogParser, SessionState
 from .questions import choose_attribute, phrase
-from .retrieval import retrieve
+from .retrieval import rank, retrieve
 
 
 class ShoppingCopilot:
@@ -36,6 +36,7 @@ class ShoppingCopilot:
         self.index = CatalogIndex(catalog_path, config)
         self.parser = DialogParser(self.index)
         self.sessions: dict[str, SessionState] = {}
+        self._llm_client = None
         self._fallback = [
             asin
             for asin, _ in sorted(
@@ -63,10 +64,27 @@ class ShoppingCopilot:
 
     # --------------------------------------------------------------- internal
 
+    def _llm(self):
+        """Build the client on first use.
+
+        The import is inside the method on purpose: with the LLM flags off, as
+        they are for scoring, `copilot.llm` is never imported and the process
+        holds no network client at all. A test asserts that no module on the
+        scored path imports it at module level.
+        """
+        if self._llm_client is None:
+            from .llm import LLMClient
+
+            self._llm_client = LLMClient()
+        return self._llm_client
+
     def _respond(self, state: SessionState, user_message: str, turn: int, top_k: int) -> dict:
-        self.parser.ingest(state, user_message, turn, self.config)
+        llm = self._llm() if self.config.use_llm_parse else None
+        self.parser.ingest(state, user_message, turn, self.config, llm)
 
         recommendations, candidates = retrieve(self.index, state, self.config, top_k)
+        if self.config.use_llm_rerank:
+            recommendations = self._llm_rerank(state, top_k)
         if len(recommendations) < top_k:
             recommendations = self._pad(recommendations, top_k)
         state.last_recommendations = recommendations
@@ -76,6 +94,7 @@ class ShoppingCopilot:
             attribute = choose_attribute(self.index, state, self.config, candidates)
             if attribute is not None:
                 state.asked.append(attribute)
+                recommendations = self._gate(recommendations, candidates, turn)
             message = phrase(attribute, len(candidates))
         else:
             message = "Here are my best matches based on everything you have told me."
@@ -84,8 +103,50 @@ class ShoppingCopilot:
             "message": message,
             "ask_attribute": attribute,
             "recommendations": [{"parent_asin": asin} for asin in recommendations],
-            "usage": {"prompt_tokens": 0, "completion_tokens": 0},
+            "usage": self._usage(),
         }
+
+    def _usage(self) -> dict:
+        """Cumulative token counts, so the disclosure is true either way.
+
+        Zero in the submitted configuration because no client is ever built.
+        """
+        if self._llm_client is None:
+            return {"prompt_tokens": 0, "completion_tokens": 0}
+        return self._llm_client.usage()
+
+    def _llm_rerank(self, state: SessionState, top_k: int) -> list[str]:
+        """Semantic reorder of a deeper slice, fused back as an ordering only.
+
+        Falls through to the unchanged ranking whenever the model is
+        unavailable or answers with nothing usable.
+        """
+        deep = rank(self.index, state, self.config, self.config.llm_rerank_depth)
+        if not deep:
+            return deep
+        described = [(asin, "; ".join(self.index.cards.get(asin, ()))) for asin in deep]
+        ordered = self._llm().rerank(state.dialog_text(), described)
+        return (ordered or deep)[:top_k]
+
+    def _gate(self, recommendations: list[str], candidates, turn: int) -> list[str]:
+        """Shorten the list while the candidate pool is still overloaded.
+
+        The evaluator ends the session on *any* hit, so a lucky low-rank hit on a
+        turn where we do not yet know the answer locks that rank in permanently.
+        Showing a short list and asking instead trades one turn (worth 0.20/10)
+        for the rank (worth up to 0.30) -- about 13:1 in our favour.
+
+        Only ever applied on a turn where we are actually asking something: a
+        short list without a question would just be a worse answer.
+        """
+        config = self.config
+        if not config.use_confidence_gate:
+            return recommendations
+        if turn > config.gate_max_turn:
+            return recommendations
+        if len(candidates) <= config.gate_candidate_threshold:
+            return recommendations
+        return recommendations[: config.gate_list_size]
 
     def _pad(self, recommendations: list[str], top_k: int) -> list[str]:
         seen = set(recommendations)

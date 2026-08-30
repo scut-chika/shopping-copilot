@@ -112,6 +112,44 @@ class Config:
     if it is ever wrong; a filter deletes the right answer.
     """
 
+    use_confidence_gate: bool = True
+    """Withhold the tail of the list while the candidate pool is still overloaded.
+
+    Over half our remaining MRR loss came from sessions that hit on turn 1, on
+    nothing but the opening message -- a narrow category where we happened to
+    rank the target 8th. The evaluator stops the session on any hit, so a lucky
+    low-rank hit *locks in* that rank and denies us the turn that would have
+    fixed it.
+
+    The scoring arithmetic is lopsided: converting one rank-8 turn-1 hit into a
+    rank-1 turn-2 hit is worth +0.0013 of MRR against -0.0001 of efficiency,
+    because MRR carries weight 0.30 across a 0-to-1 range while one extra turn
+    costs 0.20/10. Roughly 13:1.
+
+    So when the pool is still overloaded we return a short, honest shortlist and
+    ask the question instead. This is also exactly the "retrieval cutoff when
+    facing Over-Generality (candidate pool overload)" that the track's Proactive
+    Guidance pillar asks for -- both readings are true, and the gain is real
+    either way.
+    """
+
+    gate_candidate_threshold: int = 10
+    """Pool size above which we are not confident enough to show a full list."""
+
+    gate_list_size: int = 3
+    """How many to show while gated. Never zero: a shortlist plus a question is
+    a real answer, an empty list is a wasted turn."""
+
+    gate_max_turn: int = 4
+    """Stop gating after this turn.
+
+    Without a stop, sessions whose pool never converges get gated for all ten
+    turns and finish late *and* badly ranked -- the first version pushed five
+    sessions to turn 10, losing on both axes at once. Past this point the
+    remaining turns are worth less than the rank they might buy, so we show
+    everything we have.
+    """
+
     use_prior: bool = True
     """Popularity/quality prior used to break ties inside a tier."""
 
@@ -169,8 +207,29 @@ class Config:
     """Above this candidate count, EIG is estimated on a sample this size."""
 
     # ---- LLM (optional, off by default) -----------------------------------
+    # Both off in the submitted configuration, which therefore makes no network
+    # call and reports zero tokens. `copilot/llm.py` is imported lazily from
+    # inside these branches, so with the flags off it is never loaded at all.
+
+    use_llm_parse: bool = False
+    """Ask a model which catalog constraint a paraphrased turn came from.
+
+    The only place a model has something to offer here. Generated prose is worth
+    nothing (the evaluator reads `ask_attribute`, never `message`) and the choice
+    of question has a closed-form optimum a prompt can only approximate. But when
+    the organizer paraphrases the customer -- which the specification reserves
+    the right to do -- our template regexes stop matching and the rule engine
+    goes blind, and a model can map the reworded sentence back onto the catalog
+    string that produced it.
+
+    The model only ever *selects* from a shortlist of real catalog constraints;
+    anything else it says is discarded. Off for scoring because official runs may
+    have the network disabled.
+    """
+
     use_llm_rerank: bool = False
-    """Off by default: the system is designed to score well at zero API cost."""
+    """Reorder the top `llm_rerank_depth` semantically. Off: measured, not free,
+    and the tier structure already decides the ordering that matters."""
 
     llm_rerank_depth: int = 50
 

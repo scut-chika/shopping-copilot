@@ -211,7 +211,14 @@ def test_agent_imports_only_the_standard_library():
         "collections", "__future__", "typing", "itertools", "functools",
     }
 
-    for path in sorted((ROOT / "copilot").glob("*.py")) + [ROOT / "starter" / "agent.py"]:
+    # `copilot/llm.py` is the one module allowed a network client, and it is
+    # excluded here because nothing on the scored path may import it -- which is
+    # what the second half of this test checks.
+    scored_path = [
+        path for path in sorted((ROOT / "copilot").glob("*.py")) if path.name != "llm.py"
+    ] + [ROOT / "starter" / "agent.py"]
+
+    for path in scored_path:
         tree = ast.parse(path.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
@@ -227,6 +234,39 @@ def test_agent_imports_only_the_standard_library():
                 assert root in allowed_stdlib or root in ("copilot",), (
                     f"{path.name} imports unexpected module {root!r}"
                 )
+
+    # The optional LLM stage must be imported lazily, inside the branch that
+    # enables it. If it ever moves to module level the offline guarantee becomes
+    # a promise instead of a property of the import graph.
+    for path in scored_path:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in tree.body:  # module level only; function bodies are fine
+            if isinstance(node, ast.Import):
+                names = [alias.name for alias in node.names]
+            elif isinstance(node, ast.ImportFrom):
+                names = [f"{node.module or ''}.{alias.name}" for alias in node.names]
+                if node.level:
+                    names += [alias.name for alias in node.names]
+            else:
+                continue
+            for name in names:
+                assert "llm" not in name.split("."), (
+                    f"{path.name} imports the LLM stage at module level"
+                )
+
+
+def test_llm_stage_is_never_loaded_by_default():
+    """Importing and running the agent must not pull in the network client."""
+    import subprocess
+
+    result = subprocess.run(
+        [sys.executable, "-c",
+         "import sys; sys.path.insert(0, '.');"
+         "from starter.agent import Agent;"
+         "print('copilot.llm' in sys.modules)"],
+        cwd=ROOT, capture_output=True, text=True,
+    )
+    assert result.stdout.strip().endswith("False"), result.stdout + result.stderr
 
 
 def test_agent_reads_no_secrets_from_environment():
@@ -244,3 +284,154 @@ def test_agent_reads_no_secrets_from_environment():
     finally:
         del os.environ["COPILOT_USE_BM25"]
         del os.environ["SECRET_API_KEY"]
+
+
+# --------------------------------------------------------------- replay checks
+
+
+def test_boundary_refusal_records_no_evidence(index):
+    """The two refusal phrasings mean opposite things.
+
+    "please use your judgment" is fired once per boundary session whatever the
+    target's card contains, so it says nothing about the target. Treating it as
+    a real refusal excluded the true target in 8% of turn-states.
+    """
+    from copilot.dialog import DialogParser, SessionState
+
+    parser = DialogParser(index)
+    state = SessionState(session_id="s")
+    state.asked.append("color")
+    parser.ingest(state, "I don't have a preference for color; please use your judgment.", 2, DEFAULT)
+
+    assert state.evidence == []
+    assert state.boundary_seen
+    assert "color" in state.dead_attributes
+
+
+def test_no_additional_preference_is_recorded_as_evidence(index):
+    from copilot.dialog import DialogParser, SessionState
+
+    parser = DialogParser(index)
+    state = SessionState(session_id="s")
+    state.asked.append("color")
+    parser.ingest(state, "I don't have an additional preference for color.", 2, DEFAULT)
+
+    assert len(state.evidence) == 1
+    assert state.evidence[0].attribute == "color"
+    assert state.evidence[0].revealed == ()
+
+
+def test_intent_override_opening_is_spoken_but_not_disclosed(index):
+    """The evaluator prints `old_value` without adding it to `disclosed`.
+
+    So the simulator may legitimately reveal that same value again later. If we
+    mirrored it as disclosed, the replay would predict the wrong answer.
+    """
+    from copilot.dialog import DialogParser, SessionState
+
+    constraint = next(iter(index.card_index))
+    parser = DialogParser(index)
+    state = SessionState(session_id="s")
+    parser.ingest(state, f"I'm looking for Tops. {constraint}", 1, DEFAULT)
+
+    assert state.scenario == "intent_override"
+    assert state.disclosed == set()
+    assert any(item.text == constraint for item in state.constraints)
+
+
+def test_partial_parse_records_no_evidence(index):
+    """A reply we could only half-read must not be replayed.
+
+    A wrong `revealed` tuple would rule out the true target, which is far worse
+    than the missed narrowing.
+    """
+    from copilot.dialog import DialogParser, SessionState
+
+    parser = DialogParser(index)
+    state = SessionState(session_id="s")
+    state.asked.append("material")
+    parser.ingest(state, "For that, what matters is: something not in the catalog.", 2, DEFAULT)
+
+    assert state.evidence == []
+
+
+def test_replay_never_rules_out_the_true_target(index):
+    """The regression test for the bug that made this feature look broken.
+
+    Replays every public session and asserts that the true target could always
+    have produced every answer we recorded. A single false positive here costs a
+    session outright, so this is checked over the whole public set rather than a
+    sample.
+    """
+    from copilot.dialog import DialogParser, SessionState
+    from copilot.questions import choose_attribute
+    from copilot.replay import mismatches
+    from copilot.retrieval import retrieve
+    from evaluator.local_evaluator import (
+        MAX_TURNS,
+        coarse_category,
+        customer_reply,
+        initial_message,
+        intent_card,
+        behavior_for,
+    )
+    import random
+
+    samples = [
+        json.loads(line)
+        for line in (ROOT / "data" / "public_set.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    wanted = {str(s["ground_truth"]["parent_asin"]) for s in samples}
+    products, categories = {}, {}
+    with CATALOG.open(encoding="utf-8") as handle:
+        for line in handle:
+            product = json.loads(line)
+            asin = str(product["parent_asin"])
+            if asin in wanted:
+                products[asin] = product
+                categories[asin] = [str(v) for v in (product.get("categories") or [])]
+
+    parser = DialogParser(index)
+    checked = 0
+    for sample in samples:
+        target = str(sample["ground_truth"]["parent_asin"])
+        card = intent_card(products[target])
+        rng = random.Random(f"{sample.get('sample_id', '')}\0{sample.get('scenario_type', '')}")
+        effective = {
+            **sample,
+            "intent_card": card,
+            "behavior": behavior_for(str(sample["scenario_type"]), card, rng),
+        }
+
+        state = SessionState(session_id=sample["sample_id"], profile=sample["user_profile"])
+        disclosed: set[str] = set()
+        boundary_used = False
+        override_applied = sample["scenario_type"] != "intent_override"
+        message = initial_message(effective, coarse_category(categories[target]), disclosed)
+
+        for turn in range(1, MAX_TURNS + 1):
+            parser.ingest(state, message, turn, DEFAULT)
+            assert mismatches(index, state.evidence, target) == 0, (
+                f"{sample['sample_id']} ({sample['scenario_type']}) turn {turn}: "
+                f"the replay ruled out the true target"
+            )
+            checked += 1
+            if turn >= 4:  # four turns is past the override and any refusal
+                break
+            _, candidates = retrieve(index, state, DEFAULT, 10)
+            attribute = choose_attribute(index, state, DEFAULT, candidates)
+            if attribute is not None:
+                state.asked.append(attribute)
+            override = effective.get("behavior", {}).get("override") or {}
+            if not override_applied and turn + 1 == int(override.get("turn", 3)):
+                override_applied = True
+                if str(override.get("new_value", "")):
+                    disclosed.add(str(override["new_value"]))
+                message = str(override.get("message", ""))
+            else:
+                message, boundary_used = customer_reply(
+                    effective, attribute, disclosed, boundary_used
+                )
+
+    assert checked >= 200
