@@ -69,12 +69,15 @@ set (`results/cost_profile.json`, `results/memory_profile.json`):
 
 | | |
 |---|---|
-| Startup (build all indexes over 50,000 products) | **10.2 s**, once per process |
-| Per-turn latency | mean **34.6 ms**, p50 33 ms, p95 67 ms, p99 **82 ms**, max 145 ms |
+| Index build (once per process) | **18.1 s** |
+| Per-turn latency | mean 64 ms, p50 61 ms, p95 123 ms, p99 145 ms |
 | Process RSS after index build | **205 MB** |
 | Python heap (tracemalloc peak) | **50.5 MB** |
 | LLM calls / tokens / cost | 0 / 0 / **$0.00** |
 | Network | none required |
+
+Absolute timings vary with host load; measure on your own machine with the two
+commands below rather than trusting these figures.
 
 The gap between RSS and the Python heap is the two in-memory SQLite FTS5
 indexes, which SQLite allocates in C and `tracemalloc` therefore does not see.

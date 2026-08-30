@@ -28,13 +28,13 @@ Track 4 — **Shopping Copilot: AI Conversational Search and Recommendations**
 
 Given a customer who starts vague ("I'm looking for tunics, but I'm still
 exploring") and a 50,000-product Amazon catalog, the agent has ten turns to get
-the customer's hidden target product into its top 10. It does it in **2.05 turns
+the customer's hidden target product into its top 10. It does it in **1.98 turns
 on average**, hitting on **100% of the 200 public sessions**.
 
 | | Hit Rate@10 | MRR | MTTC | **TechnicalScore** |
 |---|---|---|---|---|
 | Organizer BM25 baseline | 0.125 | 0.068 | 9.81 | **0.1067** |
-| **Shopping Copilot** | **1.000** | **0.790** | **2.05** | **0.9160** |
+| **Shopping Copilot** | **1.000** | **0.795** | **1.98** | **0.9189** |
 
 Measured by the organizer's evaluator, run unmodified.
 
@@ -74,19 +74,33 @@ test. It is our highest-MRR scenario (0.941).
 
 **Asking beats retrieving, by a lot.** We expected the exact-matching index to be
 the story. The ablation says otherwise: removing the question policy costs
-**−0.4797**, while removing the exact-match index costs **−0.0951**. With
+**−0.4826**, while removing the exact-match index costs **−0.0496**. With
 retrieval reduced to plain BM25 the system still scores 0.8457. The result is
 about the questions.
 
 **The parser was the fragile part, not the matching.** We built a paraphrase
 stress harness expecting exact matching to break first. Rewording only the
 *templates*, leaving constraint text untouched, cost more score than heavily
-paraphrasing the constraints themselves. We added template-independent constraint
-mining to close about half that gap.
+paraphrasing the constraints themselves. Template-independent constraint mining
+closes most of that gap (L1 0.8043 -> 0.8435).
+
+**Our own component did not do what we thought.** Constraint mining recovers the
+customer's stated constraint with precision ~0.27, and tripling its recall
+changed the end score by *nothing*. That null result told us it is an aggregate
+signal, not a retrieval step -- so we widened it to admit 16 weak matches instead
+of 4 confident ones, which gained at every paraphrase level and removed its
+cost on clean data. Four other hypotheses about it were falsified along the way
+and are written up in the README.
+
+**We published a wrong number and caught it.** An early version of our
+resource table claimed a 3.2x build-time speedup and a 2.6x latency
+improvement. Re-measuring old and new configurations back to back on the same
+machine showed the real figures: 1.5x on build time, and *no* latency change at
+all. The memory result (6.1x) held. The README carries the correction.
 
 **One feature was actively harmful.** The anonymized `user_profile` tags — "fit",
 "comfort", "durability" — match nearly every clothing item, so they added noise to
-tie-breaking. Disabling it *gained* 0.0142. It is off by default, kept behind a
+tie-breaking. Disabling it *gained* 0.0131. It is off by default, kept behind a
 flag so the finding stays reproducible.
 
 ### Does it generalize?
@@ -102,9 +116,9 @@ the public set**, with independently resampled user profiles, at the official
 
 | Set | n | Score | Retained |
 |---|---|---|---|
-| public | 200 | 0.9160 | — |
-| held-out, seed A | 800 | 0.8861 | **96.7%** |
-| held-out, seed B | 800 | 0.8749 | **95.5%** |
+| public | 200 | 0.9189 | — |
+| held-out, seed A | 800 | 0.8873 | **96.6%** |
+| held-out, seed B | 800 | 0.8756 | **95.3%** |
 
 Two independent draws, both retaining ~96%. We fit the task, not the sessions.
 
@@ -121,9 +135,9 @@ network client or third-party package ever appears.
 | Model | none |
 | API cost | **$0.00** |
 | Token usage | 0 prompt / 0 completion |
-| Startup | 32.1 s once, to index 50,000 products |
-| Per-turn latency | mean 82 ms, p99 196 ms |
-| Peak memory | 304 MB, in-process |
+| Index build | 18.1 s once, for 50,000 products |
+| Per-turn latency | mean 64 ms, p99 145 ms |
+| Process RSS | 205 MB, in-process |
 
 We shipped an optional LLM reranking hook and left it **off**: it would forfeit
 the offline guarantee for no measured gain.

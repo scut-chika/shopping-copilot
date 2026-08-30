@@ -65,9 +65,24 @@ class Config:
     """
 
     mining_candidates: int = 60
-    mining_max_results: int = 4
-    mined_weight_factor: float = 0.6
-    """Mined constraints are weighted below parsed ones: they can be wrong."""
+
+    mining_max_results: int = 16
+    """How many mined constraints to admit per turn.
+
+    Raised from 4 after measuring what mining actually does. Its precision at
+    recovering the *target's own* constraints is only ~0.27, and tripling its
+    recall (candidate pool 60 -> 300) changed the end score by nothing. What it
+    really provides is an aggregate boost to products whose card text overlaps
+    the turn, so the useful quantity is total evidence, not the single best
+    guess. Widening to 16 gained +0.017 to +0.038 at every paraphrase level;
+    32 was indistinguishable from 16, so this is the knee.
+    """
+
+    mined_weight_factor: float = 0.35
+    """Mined constraints are weighted below parsed ones: they are usually wrong
+    individually and only informative in aggregate. Lowering this from 0.6
+    removed the clean-set cost of mining entirely (L0 back to 0.9189) while
+    keeping the paraphrase gains."""
 
     use_prior: bool = True
     """Popularity/quality prior used to break ties inside a tier."""

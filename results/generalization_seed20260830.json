@@ -3,22 +3,22 @@
   "public": {
     "n": 200,
     "hit_rate": 1.0,
-    "mrr": 0.790046,
-    "mttc": 2.05,
-    "efficiency": 0.895,
-    "technical_score": 0.916014,
+    "mrr": 0.794573,
+    "mttc": 1.975,
+    "efficiency": 0.9025,
+    "technical_score": 0.918872,
     "by_scenario": {
       "boundary": {
         "n": 10,
         "hit_rate": 1.0,
-        "mrr": 0.8325,
-        "mttc": 3.1
+        "mrr": 0.845833,
+        "mttc": 2.5
       },
       "browsing": {
         "n": 80,
         "hit_rate": 1.0,
-        "mrr": 0.733333,
-        "mttc": 1.9
+        "mrr": 0.742986,
+        "mttc": 1.7875
       },
       "buying": {
         "n": 80,
@@ -36,11 +36,11 @@
   },
   "holdout": {
     "n": 800,
-    "hit_rate": 0.98,
-    "mrr": 0.743704,
-    "mttc": 2.35,
-    "efficiency": 0.865,
-    "technical_score": 0.886111,
+    "hit_rate": 0.98125,
+    "mrr": 0.741251,
+    "mttc": 2.28375,
+    "efficiency": 0.871625,
+    "technical_score": 0.887325,
     "by_scenario": {
       "boundary": {
         "n": 40,
@@ -51,8 +51,8 @@
       "browsing": {
         "n": 320,
         "hit_rate": 0.990625,
-        "mrr": 0.75488,
-        "mttc": 2.21875
+        "mrr": 0.747965,
+        "mttc": 2.075
       },
       "buying": {
         "n": 320,
@@ -62,11 +62,11 @@
       },
       "intent_override": {
         "n": 120,
-        "hit_rate": 0.983333,
-        "mrr": 0.88412,
-        "mttc": 3.666667
+        "hit_rate": 0.991667,
+        "mrr": 0.886204,
+        "mttc": 3.608333
       }
     }
   },
-  "gap": -0.029903
+  "gap": -0.031547
 }

@@ -3,22 +3,22 @@
   "public": {
     "n": 200,
     "hit_rate": 1.0,
-    "mrr": 0.790046,
-    "mttc": 2.05,
-    "efficiency": 0.895,
-    "technical_score": 0.916014,
+    "mrr": 0.794573,
+    "mttc": 1.975,
+    "efficiency": 0.9025,
+    "technical_score": 0.918872,
     "by_scenario": {
       "boundary": {
         "n": 10,
         "hit_rate": 1.0,
-        "mrr": 0.8325,
-        "mttc": 3.1
+        "mrr": 0.845833,
+        "mttc": 2.5
       },
       "browsing": {
         "n": 80,
         "hit_rate": 1.0,
-        "mrr": 0.733333,
-        "mttc": 1.9
+        "mrr": 0.742986,
+        "mttc": 1.7875
       },
       "buying": {
         "n": 80,
@@ -37,22 +37,22 @@
   "holdout": {
     "n": 800,
     "hit_rate": 0.97375,
-    "mrr": 0.719941,
-    "mttc": 2.3975,
-    "efficiency": 0.86025,
-    "technical_score": 0.874907,
+    "mrr": 0.718814,
+    "mttc": 2.345,
+    "efficiency": 0.8655,
+    "technical_score": 0.875619,
     "by_scenario": {
       "boundary": {
         "n": 40,
         "hit_rate": 0.95,
-        "mrr": 0.658333,
-        "mttc": 3.375
+        "mrr": 0.649792,
+        "mttc": 3.3
       },
       "browsing": {
         "n": 320,
         "hit_rate": 0.96875,
-        "mrr": 0.670833,
-        "mttc": 2.453125
+        "mrr": 0.669084,
+        "mttc": 2.33125
       },
       "buying": {
         "n": 320,
@@ -68,5 +68,5 @@
       }
     }
   },
-  "gap": -0.041107
+  "gap": -0.043253
 }
