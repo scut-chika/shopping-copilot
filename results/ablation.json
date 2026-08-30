@@ -1,0 +1,520 @@
+{
+  "full system": {
+    "overrides": {},
+    "n": 200,
+    "hit_rate": 1.0,
+    "mrr": 0.790046,
+    "mttc": 2.05,
+    "efficiency": 0.895,
+    "technical_score": 0.916014,
+    "by_scenario": {
+      "boundary": {
+        "n": 10,
+        "hit_rate": 1.0,
+        "mrr": 0.8325,
+        "mttc": 3.1
+      },
+      "browsing": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.733333,
+        "mttc": 1.9
+      },
+      "buying": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.784767,
+        "mttc": 1.4875
+      },
+      "intent_override": {
+        "n": 30,
+        "hit_rate": 1.0,
+        "mrr": 0.941204,
+        "mttc": 3.6
+      }
+    }
+  },
+  "- card-exact index": {
+    "overrides": {
+      "use_card_index": false
+    },
+    "n": 200,
+    "hit_rate": 0.95,
+    "mrr": 0.596462,
+    "mttc": 2.65,
+    "efficiency": 0.835,
+    "technical_score": 0.820939,
+    "by_scenario": {
+      "boundary": {
+        "n": 10,
+        "hit_rate": 0.9,
+        "mrr": 0.753333,
+        "mttc": 3.4
+      },
+      "browsing": {
+        "n": 80,
+        "hit_rate": 0.9625,
+        "mrr": 0.612133,
+        "mttc": 2.275
+      },
+      "buying": {
+        "n": 80,
+        "hit_rate": 0.95,
+        "mrr": 0.502445,
+        "mttc": 2.3875
+      },
+      "intent_override": {
+        "n": 30,
+        "hit_rate": 0.933333,
+        "mrr": 0.753095,
+        "mttc": 4.1
+      }
+    }
+  },
+  "- loose index": {
+    "overrides": {
+      "use_loose_index": false
+    },
+    "n": 200,
+    "hit_rate": 1.0,
+    "mrr": 0.790046,
+    "mttc": 2.05,
+    "efficiency": 0.895,
+    "technical_score": 0.916014,
+    "by_scenario": {
+      "boundary": {
+        "n": 10,
+        "hit_rate": 1.0,
+        "mrr": 0.8325,
+        "mttc": 3.1
+      },
+      "browsing": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.733333,
+        "mttc": 1.9
+      },
+      "buying": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.784767,
+        "mttc": 1.4875
+      },
+      "intent_override": {
+        "n": 30,
+        "hit_rate": 1.0,
+        "mrr": 0.941204,
+        "mttc": 3.6
+      }
+    }
+  },
+  "- category filter": {
+    "overrides": {
+      "use_category_filter": false
+    },
+    "n": 200,
+    "hit_rate": 0.99,
+    "mrr": 0.777446,
+    "mttc": 2.225,
+    "efficiency": 0.8775,
+    "technical_score": 0.903734,
+    "by_scenario": {
+      "boundary": {
+        "n": 10,
+        "hit_rate": 1.0,
+        "mrr": 0.639286,
+        "mttc": 3.1
+      },
+      "browsing": {
+        "n": 80,
+        "hit_rate": 0.9875,
+        "mrr": 0.744807,
+        "mttc": 2.1375
+      },
+      "buying": {
+        "n": 80,
+        "hit_rate": 0.9875,
+        "mrr": 0.776662,
+        "mttc": 1.6875
+      },
+      "intent_override": {
+        "n": 30,
+        "hit_rate": 1.0,
+        "mrr": 0.912632,
+        "mttc": 3.6
+      }
+    }
+  },
+  "- BM25 route": {
+    "overrides": {
+      "use_bm25": false
+    },
+    "n": 200,
+    "hit_rate": 1.0,
+    "mrr": 0.690315,
+    "mttc": 1.525,
+    "efficiency": 0.9475,
+    "technical_score": 0.896594,
+    "by_scenario": {
+      "boundary": {
+        "n": 10,
+        "hit_rate": 1.0,
+        "mrr": 0.521111,
+        "mttc": 1.4
+      },
+      "browsing": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.581627,
+        "mttc": 1.2375
+      },
+      "buying": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.718606,
+        "mttc": 1.05
+      },
+      "intent_override": {
+        "n": 30,
+        "hit_rate": 1.0,
+        "mrr": 0.961111,
+        "mttc": 3.6
+      }
+    }
+  },
+  "- popularity prior": {
+    "overrides": {
+      "use_prior": false
+    },
+    "n": 200,
+    "hit_rate": 1.0,
+    "mrr": 0.69155,
+    "mttc": 2.255,
+    "efficiency": 0.8745,
+    "technical_score": 0.882365,
+    "by_scenario": {
+      "boundary": {
+        "n": 10,
+        "hit_rate": 1.0,
+        "mrr": 0.7325,
+        "mttc": 3.6
+      },
+      "browsing": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.644435,
+        "mttc": 2.2
+      },
+      "buying": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.652773,
+        "mttc": 1.625
+      },
+      "intent_override": {
+        "n": 30,
+        "hit_rate": 1.0,
+        "mrr": 0.906944,
+        "mttc": 3.633333
+      }
+    }
+  },
+  "+ user profile (default off)": {
+    "overrides": {
+      "use_profile": true
+    },
+    "n": 200,
+    "hit_rate": 1.0,
+    "mrr": 0.741448,
+    "mttc": 2.03,
+    "efficiency": 0.897,
+    "technical_score": 0.901834,
+    "by_scenario": {
+      "boundary": {
+        "n": 10,
+        "hit_rate": 1.0,
+        "mrr": 0.803333,
+        "mttc": 3.1
+      },
+      "browsing": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.67316,
+        "mttc": 1.875
+      },
+      "buying": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.733343,
+        "mttc": 1.4625
+      },
+      "intent_override": {
+        "n": 30,
+        "hit_rate": 1.0,
+        "mrr": 0.924537,
+        "mttc": 3.6
+      }
+    }
+  },
+  "- constraint mining": {
+    "overrides": {
+      "use_constraint_mining": false
+    },
+    "n": 200,
+    "hit_rate": 1.0,
+    "mrr": 0.794573,
+    "mttc": 1.975,
+    "efficiency": 0.9025,
+    "technical_score": 0.918872,
+    "by_scenario": {
+      "boundary": {
+        "n": 10,
+        "hit_rate": 1.0,
+        "mrr": 0.845833,
+        "mttc": 2.5
+      },
+      "browsing": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.742986,
+        "mttc": 1.7875
+      },
+      "buying": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.784767,
+        "mttc": 1.4875
+      },
+      "intent_override": {
+        "n": 30,
+        "hit_rate": 1.0,
+        "mrr": 0.941204,
+        "mttc": 3.6
+      }
+    }
+  },
+  "mining ungated": {
+    "overrides": {
+      "mining_only_when_parse_fails": false
+    },
+    "n": 200,
+    "hit_rate": 1.0,
+    "mrr": 0.785302,
+    "mttc": 2.065,
+    "efficiency": 0.8935,
+    "technical_score": 0.914291,
+    "by_scenario": {
+      "boundary": {
+        "n": 10,
+        "hit_rate": 1.0,
+        "mrr": 0.8325,
+        "mttc": 3.1
+      },
+      "browsing": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.711473,
+        "mttc": 1.9125
+      },
+      "buying": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.794767,
+        "mttc": 1.5
+      },
+      "intent_override": {
+        "n": 30,
+        "hit_rate": 1.0,
+        "mrr": 0.941204,
+        "mttc": 3.633333
+      }
+    }
+  },
+  "questions: none": {
+    "overrides": {
+      "question_strategy": "none"
+    },
+    "n": 200,
+    "hit_rate": 0.48,
+    "mrr": 0.356915,
+    "mttc": 6.54,
+    "efficiency": 0.446,
+    "technical_score": 0.436274,
+    "by_scenario": {
+      "boundary": {
+        "n": 10,
+        "hit_rate": 0.3,
+        "mrr": 0.3,
+        "mttc": 8.0
+      },
+      "browsing": {
+        "n": 80,
+        "hit_rate": 0.2625,
+        "mrr": 0.152326,
+        "mttc": 8.375
+      },
+      "buying": {
+        "n": 80,
+        "hit_rate": 0.575,
+        "mrr": 0.412148,
+        "mttc": 5.25
+      },
+      "intent_override": {
+        "n": 30,
+        "hit_rate": 0.866667,
+        "mrr": 0.774167,
+        "mttc": 4.6
+      }
+    }
+  },
+  "questions: fixed cycle": {
+    "overrides": {
+      "question_strategy": "cycle"
+    },
+    "n": 200,
+    "hit_rate": 1.0,
+    "mrr": 0.763129,
+    "mttc": 2.125,
+    "efficiency": 0.8875,
+    "technical_score": 0.906439,
+    "by_scenario": {
+      "boundary": {
+        "n": 10,
+        "hit_rate": 1.0,
+        "mrr": 0.795,
+        "mttc": 3.7
+      },
+      "browsing": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.711682,
+        "mttc": 1.95
+      },
+      "buying": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.758745,
+        "mttc": 1.5375
+      },
+      "intent_override": {
+        "n": 30,
+        "hit_rate": 1.0,
+        "mrr": 0.901389,
+        "mttc": 3.633333
+      }
+    }
+  },
+  "questions: always 'other'": {
+    "overrides": {
+      "question_strategy": "other"
+    },
+    "n": 200,
+    "hit_rate": 0.995,
+    "mrr": 0.790984,
+    "mttc": 2.005,
+    "efficiency": 0.8995,
+    "technical_score": 0.914695,
+    "by_scenario": {
+      "boundary": {
+        "n": 10,
+        "hit_rate": 1.0,
+        "mrr": 0.791667,
+        "mttc": 2.5
+      },
+      "browsing": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.742569,
+        "mttc": 1.8
+      },
+      "buying": {
+        "n": 80,
+        "hit_rate": 0.9875,
+        "mrr": 0.782981,
+        "mttc": 1.55
+      },
+      "intent_override": {
+        "n": 30,
+        "hit_rate": 1.0,
+        "mrr": 0.941204,
+        "mttc": 3.6
+      }
+    }
+  },
+  "questions: EIG, no 'other' arm": {
+    "overrides": {
+      "allow_other_arm": false
+    },
+    "n": 200,
+    "hit_rate": 0.995,
+    "mrr": 0.77099,
+    "mttc": 2.21,
+    "efficiency": 0.879,
+    "technical_score": 0.904597,
+    "by_scenario": {
+      "boundary": {
+        "n": 10,
+        "hit_rate": 0.9,
+        "mrr": 0.68,
+        "mttc": 4.7
+      },
+      "browsing": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.737029,
+        "mttc": 2.0375
+      },
+      "buying": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.758745,
+        "mttc": 1.55
+      },
+      "intent_override": {
+        "n": 30,
+        "hit_rate": 1.0,
+        "mrr": 0.924537,
+        "mttc": 3.6
+      }
+    }
+  },
+  "retrieval: BM25 only": {
+    "overrides": {
+      "use_card_index": false,
+      "use_loose_index": false,
+      "use_category_filter": false
+    },
+    "n": 200,
+    "hit_rate": 0.955,
+    "mrr": 0.663399,
+    "mttc": 2.54,
+    "efficiency": 0.846,
+    "technical_score": 0.84572,
+    "by_scenario": {
+      "boundary": {
+        "n": 10,
+        "hit_rate": 1.0,
+        "mrr": 0.736667,
+        "mttc": 2.8
+      },
+      "browsing": {
+        "n": 80,
+        "hit_rate": 0.9875,
+        "mrr": 0.648105,
+        "mttc": 2.05
+      },
+      "buying": {
+        "n": 80,
+        "hit_rate": 0.925,
+        "mrr": 0.646121,
+        "mttc": 2.4
+      },
+      "intent_override": {
+        "n": 30,
+        "hit_rate": 0.933333,
+        "mrr": 0.725833,
+        "mttc": 4.133333
+      }
+    }
+  }
+}

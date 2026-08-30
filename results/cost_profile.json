@@ -1,0 +1,16 @@
+{
+  "startup_seconds": 32.13,
+  "index_peak_memory_mb": 303.5,
+  "turns_measured": 410,
+  "latency_ms": {
+    "mean": 81.95,
+    "p50": 77.9,
+    "p95": 155.17,
+    "p99": 195.8,
+    "max": 231.33
+  },
+  "llm_calls": 0,
+  "prompt_tokens": 0,
+  "completion_tokens": 0,
+  "api_cost_usd": 0.0
+}

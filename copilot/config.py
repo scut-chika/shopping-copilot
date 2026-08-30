@@ -1,0 +1,118 @@
+"""Tunable configuration for the Shopping Copilot agent.
+
+Every retrieval route and strategy is behind a flag so that `tools/ablation.py`
+can turn one thing off at a time and measure its contribution.  The defaults
+here are the configuration we submit.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class Config:
+    # ---- retrieval routes -------------------------------------------------
+    use_card_index: bool = True
+    """Route 1: exact match against reconstructed intent-card constraints."""
+
+    use_loose_index: bool = True
+    """Route 2: constraint text matched against raw feature/detail strings."""
+
+    use_category_filter: bool = True
+    """Route 3: coarse-category narrowing from the opening message."""
+
+    use_bm25: bool = True
+    """Route 4: FTS5 BM25 over accumulated dialog text (paraphrase fallback)."""
+
+    use_constraint_mining: bool = True
+    """Recover constraints by token overlap when template parsing misses them.
+
+    Template parsing is exact but brittle: the robustness harness showed that
+    rewording the templates alone (constraint text untouched) cost more score
+    than heavily paraphrasing the constraints themselves.  Mining removes that
+    dependence on the organizer's exact phrasing.
+    """
+
+    mining_only_when_parse_fails: bool = True
+    """Mine only when template parsing recovered nothing this turn.
+
+    Mining is a salvage path, not a second opinion: on well-formed turns the
+    template parse is exact, so letting mining also fire there only adds false
+    positives.  Gating it keeps clean-set accuracy while retaining the
+    paraphrase safety net.
+    """
+
+    mining_min_overlap: float = 0.75
+    """Fraction of a constraint's content tokens that must appear in the turn."""
+
+    mining_min_tokens: int = 2
+    """Minimum constraint length to be mineable.
+
+    Kept at the floor: raising it to 4 was measured and *cost* score (L1 0.826
+    -> 0.796), because it excluded genuine short constraints.  The problem it
+    was meant to solve -- short generic strings like "Machine Wash" hitting
+    ratio 1.0 and crowding out the long specific constraint -- is instead fixed
+    by ranking on absolute matched tokens rather than ratio.
+    """
+
+    mining_candidates: int = 60
+    mining_max_results: int = 4
+    mined_weight_factor: float = 0.6
+    """Mined constraints are weighted below parsed ones: they can be wrong."""
+
+    use_prior: bool = True
+    """Popularity/quality prior used to break ties inside a tier."""
+
+    use_profile: bool = False
+    """Anonymized user_profile preference tags as a soft ranking signal.
+
+    Off by default because the ablation measured it as a *net negative*
+    (+0.0131 TechnicalScore when disabled): the tags are coarse ("fit",
+    "comfort", "durability") and match almost every clothing item, so they add
+    noise to tie-breaking rather than signal.  Kept behind a flag rather than
+    deleted so the finding stays reproducible.
+    """
+
+    # ---- fusion weights ---------------------------------------------------
+    tier_weight: float = 1000.0
+    """Weight per matched constraint. Large, so constraint count dominates."""
+
+    loose_match_weight: float = 0.5
+    """A loose (raw-text) constraint match counts less than a card match."""
+
+    category_weight: float = 400.0
+    bm25_weight: float = 30.0
+    prior_weight: float = 8.0
+    profile_weight: float = 4.0
+
+    emphasis_bonus: float = 250.0
+    """Extra weight for a constraint the customer explicitly re-stated."""
+
+    # ---- candidate generation --------------------------------------------
+    max_posting_list: int = 20_000
+    """Constraint postings larger than this are too common to intersect on."""
+
+    candidate_pool: int = 400
+    """How many scored candidates to carry into reranking."""
+
+    bm25_pool: int = 300
+
+    # ---- question strategy ------------------------------------------------
+    question_strategy: str = "eig"
+    """One of: "eig" (expected information gain), "other", "cycle", "none"."""
+
+    allow_other_arm: bool = True
+    """Whether the wildcard `other` attribute may be chosen by the estimator."""
+
+    eig_max_candidates: int = 1200
+    """Above this candidate count, EIG is estimated on a sample this size."""
+
+    # ---- LLM (optional, off by default) -----------------------------------
+    use_llm_rerank: bool = False
+    """Off by default: the system is designed to score well at zero API cost."""
+
+    llm_rerank_depth: int = 50
+
+
+DEFAULT = Config()

@@ -1,0 +1,8 @@
+# The agent itself has NO third-party runtime dependencies.
+# Everything it needs (json, re, sqlite3 with FTS5, math, collections) ships
+# with CPython. This is deliberate: the submission rules note that official
+# scoring may run with network access disabled, so the agent must never need
+# to reach a package index, a model API, or an external vector database.
+#
+# Development-only (not required to run or score the agent):
+#   pytest>=8.0    # test suite
