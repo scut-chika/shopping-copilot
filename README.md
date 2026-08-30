@@ -195,18 +195,24 @@ time, official protocol, 200 sessions:
 |---|---|---|---|---|---|
 | **full system** | **0.9160** | — | 1.000 | 0.7900 | 2.05 |
 | questions: none | 0.4363 | **−0.4797** | 0.480 | 0.3569 | 6.54 |
-| − card-exact index | 0.8209 | −0.0951 | 0.950 | 0.5965 | 2.65 |
 | retrieval: BM25 only | 0.8457 | −0.0703 | 0.955 | 0.6634 | 2.54 |
+| − card-exact index | 0.8693 | −0.0467 | 0.970 | 0.7042 | 2.35 |
 | − popularity prior | 0.8824 | −0.0336 | 1.000 | 0.6915 | 2.26 |
 | − BM25 route | 0.8966 | −0.0194 | 1.000 | 0.6903 | 1.53 |
-| + user profile | 0.9018 | −0.0142 | 1.000 | 0.7414 | 2.03 |
+| + user profile *(default off)* | 0.9018 | −0.0142 | 1.000 | 0.7414 | 2.03 |
 | − category filter | 0.9037 | −0.0123 | 0.990 | 0.7774 | 2.23 |
 | questions: EIG without `other` | 0.9046 | −0.0114 | 0.995 | 0.7710 | 2.21 |
 | questions: fixed cycle | 0.9064 | −0.0096 | 1.000 | 0.7631 | 2.13 |
 | mining ungated | 0.9143 | −0.0017 | 1.000 | 0.7853 | 2.07 |
 | questions: always `other` | 0.9147 | −0.0013 | 0.995 | 0.7910 | 2.01 |
-| − loose index | 0.9160 | ±0.0000 | 1.000 | 0.7900 | 2.05 |
+| + loose index *(default off)* | 0.9160 | ±0.0000 | 1.000 | 0.7900 | 2.05 |
+| + retain raw products *(default off)* | 0.9160 | ±0.0000 | 1.000 | 0.7900 | 2.05 |
 | − constraint mining | 0.9189 | **+0.0029** | 1.000 | 0.7946 | 1.98 |
+
+Four flags change how the *index* is built rather than how a request is served,
+so those variants rebuild the index instead of reusing a shared one. An earlier
+version of the script did not, and silently reported 0.0000 for the user-profile
+row; `tools/ablation.py` now marks each result with `rebuilt_index`.
 
 Things we changed because of this table, not because they sounded good:
 
@@ -215,8 +221,11 @@ Things we changed because of this table, not because they sounded good:
   add noise to tie-breaking. Kept behind a flag so the finding stays reproducible.
 - **Constraint mining costs 0.0029 here** and is still enabled, because it buys
   robustness the public set cannot show. See below.
-- **The loose index contributes nothing measurable.** Retained only as a fallback
-  for constraints whose card ordering differs. An honest "kept, but unproven".
+- **The loose index is off by default: it contributes literally nothing.**
+  Identical scores to four decimal places on the clean set *and* at all five
+  paraphrase levels, for ~62 MB of heap. It was a plausible fallback for
+  constraints whose card ordering differs from what the customer disclosed; that
+  case appears never to occur. Kept behind a flag so the finding is reproducible.
 - **EIG barely beats always asking `other`** (+0.0013), because `other` is a
   wildcard matching any undisclosed constraint. We kept the estimator anyway: it
   is the mechanism that generalises, and with the wildcard removed entirely it
@@ -260,18 +269,41 @@ baseline. The score does not rest on the exact-matching insight alone.
 
 ## Cost, latency, and the offline guarantee
 
-`python tools/profile_cost.py --memory` → `results/cost_profile.json`
+`python tools/profile_cost.py` and `python tools/memcheck.py` →
+`results/cost_profile.json`, `results/memory_profile.json`
 
-| | |
-|---|---|
-| Model | **none** |
-| Network access required | **no** |
-| API cost | **$0.00** |
-| Reported token usage | 0 prompt / 0 completion |
-| Startup | 32.1 s, once per process, to index 50,000 products |
-| Per-turn latency | mean 82 ms, p50 78 ms, p95 155 ms, p99 196 ms, max 231 ms |
-| Peak index memory | 304 MB, in-process (no external vector DB) |
-| Measured over | 410 turns across the 200 public sessions |
+| | Shipped | Before the memory pass |
+|---|---|---|
+| Model | **none** | none |
+| Network access required | **no** | no |
+| API cost | **$0.00** | $0.00 |
+| Token usage | 0 prompt / 0 completion | 0 / 0 |
+| Startup (index 50,000 products) | **10.2 s** | 32.1 s |
+| Per-turn latency, mean | **34.6 ms** | 82 ms |
+| Per-turn latency, p99 | **82 ms** | 196 ms |
+| Process RSS after build | **205 MB** | — |
+| Python heap (tracemalloc peak) | **50.5 MB** | 303.5 MB |
+
+The rules reserve the right to score "under CPU, memory, timeout, and network
+restrictions", so we treated the resource envelope as a requirement rather than a
+footnote. Three structures were costing 88% of the Python heap for no measured
+benefit, and the ablation confirms removing each is worth exactly ±0.0000:
+
+- the **raw 50k product dicts** (173 MB) — read only while building the indexes,
+  never in the request path, so the catalog is now streamed and discarded;
+- **`_profile_text`** (26 MB) — only read when `use_profile` is on, which the
+  ablation had already shown to be a net negative;
+- the **loose index** (62 MB) — measured to contribute nothing at any
+  perturbation level.
+
+Score after all three: **0.916014**, bit-identical. Latency fell by more than the
+memory work alone predicts, because a smaller working set means fewer cache
+misses per turn.
+
+The gap between the 205 MB RSS and the 50.5 MB Python heap is the two in-memory
+SQLite FTS5 indexes, which SQLite allocates in C where `tracemalloc` cannot see
+them. RSS is the number that matters against a memory cap, and it is the one we
+report.
 
 The agent imports only `json`, `math`, `os`, `re`, `sqlite3`, `dataclasses`,
 `pathlib`, and `collections`. `test_agent_imports_only_the_standard_library`
@@ -284,8 +316,9 @@ An optional LLM reranking hook exists (`use_llm_rerank`, default off). It stays
 off because the deterministic system already saturates Hit Rate@10, and because
 enabling it would forfeit the offline guarantee for no measured gain.
 
-Per-turn latency was originally 146 ms; `retrieve()` now scores candidates once
-per turn instead of once for ranking and again for question estimation.
+Per-turn latency was originally 146 ms; `retrieve()` scores candidates once per
+turn instead of once for ranking and again for question estimation, and the
+memory pass above took it the rest of the way to 34.6 ms.
 
 ## Layout
 
@@ -303,6 +336,7 @@ starter/
   baseline_agent.py    organizer's original weak BM25 agent, kept for reference
 tools/
   harness.py           shared replay harness with a perturbation hook
+  memcheck.py          index memory footprint and build time
   generalize.py        held-out unseen-target evaluation
   ablation.py          component ablation
   robustness.py        paraphrase stress test

@@ -141,7 +141,7 @@ def test_always_returns_ten_valid_recommendations(index):
         asins = [r["parent_asin"] for r in response["recommendations"]]
         assert len(asins) == 10
         assert len(set(asins)) == 10
-        assert all(a in index.products for a in asins)
+        assert all(a in index for a in asins)
         assert response["ask_attribute"] in (*mirror.ALLOWED_ATTRIBUTES, None)
 
 
@@ -181,7 +181,7 @@ def test_respond_without_reset_does_not_crash(index):
 def test_eig_prefers_a_partitioning_question(index):
     from copilot.questions import expected_remaining
 
-    candidates = list(islice(index.products, 300))
+    candidates = list(islice(index.asins, 300))
     scores = {
         attribute: expected_remaining(index, candidates, attribute, set())
         for attribute in ("other", "feature", "budget")

@@ -19,10 +19,18 @@ from copilot.agent import ShoppingCopilot  # noqa: E402
 from copilot.config import DEFAULT  # noqa: E402
 from tools.harness import load_catalog, load_samples, run  # noqa: E402
 
+# Flags consumed by CatalogIndex.__init__ rather than at request time. Flipping
+# one of these on a prebuilt index silently does nothing, so those variants must
+# rebuild. (An earlier version of this script did not, and reported a spurious
+# 0.0000 for the user-profile row.)
+INDEX_AFFECTING = frozenset({
+    "use_profile", "use_loose_index", "retain_products", "use_constraint_mining",
+})
+
 VARIANTS: list[tuple[str, dict]] = [
     ("full system", {}),
     ("- card-exact index", {"use_card_index": False}),
-    ("- loose index", {"use_loose_index": False}),
+    ("+ loose index (default off)", {"use_loose_index": True}),
     ("- category filter", {"use_category_filter": False}),
     ("- BM25 route", {"use_bm25": False}),
     ("- popularity prior", {"use_prior": False}),
@@ -33,6 +41,7 @@ VARIANTS: list[tuple[str, dict]] = [
     ("questions: fixed cycle", {"question_strategy": "cycle"}),
     ("questions: always 'other'", {"question_strategy": "other"}),
     ("questions: EIG, no 'other' arm", {"allow_other_arm": False}),
+    ("+ retain raw products", {"retain_products": True}),
     ("retrieval: BM25 only", {
         "use_card_index": False, "use_loose_index": False, "use_category_filter": False,
     }),
@@ -55,10 +64,19 @@ def main() -> None:
     print(header)
     print("-" * len(header))
     for name, overrides in VARIANTS:
-        agent.config = replace(DEFAULT, **overrides) if overrides else DEFAULT
-        agent.sessions.clear()
-        result = run(agent, samples, catalog_ids, categories, products)
-        report[name] = {"overrides": overrides, **result}
+        config = replace(DEFAULT, **overrides) if overrides else DEFAULT
+        if INDEX_AFFECTING & set(overrides):
+            active = ShoppingCopilot(args.catalog, config)
+        else:
+            active = agent
+            active.config = config
+        active.sessions.clear()
+        result = run(active, samples, catalog_ids, categories, products)
+        report[name] = {
+            "overrides": overrides,
+            "rebuilt_index": bool(INDEX_AFFECTING & set(overrides)),
+            **result,
+        }
         if full is None:
             full = result["technical_score"]
         delta = result["technical_score"] - full

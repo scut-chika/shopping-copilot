@@ -16,8 +16,16 @@ class Config:
     use_card_index: bool = True
     """Route 1: exact match against reconstructed intent-card constraints."""
 
-    use_loose_index: bool = True
-    """Route 2: constraint text matched against raw feature/detail strings."""
+    use_loose_index: bool = False
+    """Route 2: constraint text matched against raw feature/detail strings.
+
+    Off by default because it was measured to contribute *nothing*: identical
+    scores to four decimal places on the clean public set and at every one of the
+    five paraphrase levels, while costing ~62 MB of heap and time to build. It
+    was a plausible fallback for constraints whose card ordering differs from
+    what the customer disclosed; that case appears not to occur. Kept behind the
+    flag rather than deleted so the finding stays reproducible.
+    """
 
     use_category_filter: bool = True
     """Route 3: coarse-category narrowing from the opening message."""
@@ -88,6 +96,15 @@ class Config:
 
     emphasis_bonus: float = 250.0
     """Extra weight for a constraint the customer explicitly re-stated."""
+
+    retain_products: bool = False
+    """Keep the raw 50k product dicts in memory after indexing.
+
+    Off by default. Nothing in the agent's request path reads them -- they are
+    needed only while building the indexes -- and retaining them cost 173 MB,
+    about 55% of the process footprint. Tools that need raw catalog fields load
+    the catalog themselves; set this to True only for interactive debugging.
+    """
 
     # ---- candidate generation --------------------------------------------
     max_posting_list: int = 20_000

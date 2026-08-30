@@ -1,6 +1,7 @@
 {
   "full system": {
     "overrides": {},
+    "rebuilt_index": false,
     "n": 200,
     "hit_rate": 1.0,
     "mrr": 0.790046,
@@ -38,43 +39,45 @@
     "overrides": {
       "use_card_index": false
     },
+    "rebuilt_index": false,
     "n": 200,
-    "hit_rate": 0.95,
-    "mrr": 0.596462,
-    "mttc": 2.65,
-    "efficiency": 0.835,
-    "technical_score": 0.820939,
+    "hit_rate": 0.97,
+    "mrr": 0.704226,
+    "mttc": 2.35,
+    "efficiency": 0.865,
+    "technical_score": 0.869268,
     "by_scenario": {
       "boundary": {
         "n": 10,
-        "hit_rate": 0.9,
-        "mrr": 0.753333,
-        "mttc": 3.4
+        "hit_rate": 1.0,
+        "mrr": 0.745,
+        "mttc": 2.9
       },
       "browsing": {
         "n": 80,
-        "hit_rate": 0.9625,
-        "mrr": 0.612133,
-        "mttc": 2.275
+        "hit_rate": 1.0,
+        "mrr": 0.664251,
+        "mttc": 1.8625
       },
       "buying": {
         "n": 80,
         "hit_rate": 0.95,
-        "mrr": 0.502445,
-        "mttc": 2.3875
+        "mrr": 0.707237,
+        "mttc": 2.1125
       },
       "intent_override": {
         "n": 30,
         "hit_rate": 0.933333,
-        "mrr": 0.753095,
+        "mrr": 0.789206,
         "mttc": 4.1
       }
     }
   },
-  "- loose index": {
+  "+ loose index (default off)": {
     "overrides": {
-      "use_loose_index": false
+      "use_loose_index": true
     },
+    "rebuilt_index": true,
     "n": 200,
     "hit_rate": 1.0,
     "mrr": 0.790046,
@@ -112,6 +115,7 @@
     "overrides": {
       "use_category_filter": false
     },
+    "rebuilt_index": false,
     "n": 200,
     "hit_rate": 0.99,
     "mrr": 0.777446,
@@ -149,6 +153,7 @@
     "overrides": {
       "use_bm25": false
     },
+    "rebuilt_index": false,
     "n": 200,
     "hit_rate": 1.0,
     "mrr": 0.690315,
@@ -186,6 +191,7 @@
     "overrides": {
       "use_prior": false
     },
+    "rebuilt_index": false,
     "n": 200,
     "hit_rate": 1.0,
     "mrr": 0.69155,
@@ -223,6 +229,7 @@
     "overrides": {
       "use_profile": true
     },
+    "rebuilt_index": true,
     "n": 200,
     "hit_rate": 1.0,
     "mrr": 0.741448,
@@ -260,6 +267,7 @@
     "overrides": {
       "use_constraint_mining": false
     },
+    "rebuilt_index": true,
     "n": 200,
     "hit_rate": 1.0,
     "mrr": 0.794573,
@@ -297,6 +305,7 @@
     "overrides": {
       "mining_only_when_parse_fails": false
     },
+    "rebuilt_index": false,
     "n": 200,
     "hit_rate": 1.0,
     "mrr": 0.785302,
@@ -334,6 +343,7 @@
     "overrides": {
       "question_strategy": "none"
     },
+    "rebuilt_index": false,
     "n": 200,
     "hit_rate": 0.48,
     "mrr": 0.356915,
@@ -371,6 +381,7 @@
     "overrides": {
       "question_strategy": "cycle"
     },
+    "rebuilt_index": false,
     "n": 200,
     "hit_rate": 1.0,
     "mrr": 0.763129,
@@ -408,6 +419,7 @@
     "overrides": {
       "question_strategy": "other"
     },
+    "rebuilt_index": false,
     "n": 200,
     "hit_rate": 0.995,
     "mrr": 0.790984,
@@ -445,6 +457,7 @@
     "overrides": {
       "allow_other_arm": false
     },
+    "rebuilt_index": false,
     "n": 200,
     "hit_rate": 0.995,
     "mrr": 0.77099,
@@ -478,12 +491,51 @@
       }
     }
   },
+  "+ retain raw products": {
+    "overrides": {
+      "retain_products": true
+    },
+    "rebuilt_index": true,
+    "n": 200,
+    "hit_rate": 1.0,
+    "mrr": 0.790046,
+    "mttc": 2.05,
+    "efficiency": 0.895,
+    "technical_score": 0.916014,
+    "by_scenario": {
+      "boundary": {
+        "n": 10,
+        "hit_rate": 1.0,
+        "mrr": 0.8325,
+        "mttc": 3.1
+      },
+      "browsing": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.733333,
+        "mttc": 1.9
+      },
+      "buying": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.784767,
+        "mttc": 1.4875
+      },
+      "intent_override": {
+        "n": 30,
+        "hit_rate": 1.0,
+        "mrr": 0.941204,
+        "mttc": 3.6
+      }
+    }
+  },
   "retrieval: BM25 only": {
     "overrides": {
       "use_card_index": false,
       "use_loose_index": false,
       "use_category_filter": false
     },
+    "rebuilt_index": true,
     "n": 200,
     "hit_rate": 0.955,
     "mrr": 0.663399,

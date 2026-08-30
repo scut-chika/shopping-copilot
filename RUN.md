@@ -63,13 +63,36 @@ carries a secret.
 
 ## Resource envelope
 
-Measured over 410 turns on the public set (`cost_profile.json`):
+The rules reserve the right to score "under CPU, memory, timeout, and network
+restrictions", so these are measured, not estimated. Over 410 turns on the public
+set (`results/cost_profile.json`, `results/memory_profile.json`):
 
 | | |
 |---|---|
-| Startup (build all indexes over 50,000 products) | 32.1 s, once per process |
-| Per-turn latency | mean 82 ms, p50 78 ms, p95 155 ms, p99 196 ms, max 231 ms |
-| Peak index memory | 304 MB, in-process |
-| LLM calls / tokens / cost | 0 / 0 / $0.00 |
+| Startup (build all indexes over 50,000 products) | **10.2 s**, once per process |
+| Per-turn latency | mean **34.6 ms**, p50 33 ms, p95 67 ms, p99 **82 ms**, max 145 ms |
+| Process RSS after index build | **205 MB** |
+| Python heap (tracemalloc peak) | **50.5 MB** |
+| LLM calls / tokens / cost | 0 / 0 / **$0.00** |
+| Network | none required |
+
+The gap between RSS and the Python heap is the two in-memory SQLite FTS5
+indexes, which SQLite allocates in C and `tracemalloc` therefore does not see.
+RSS is the number that matters for a memory cap.
 
 The index build happens once in `Agent.__init__`, not per session or per turn.
+
+Reproduce with `python tools/memcheck.py` and `python tools/profile_cost.py`.
+
+## Mapping to the recommended submission layout
+
+`docs/submission_rules.md` suggests `submission/{agent.py, requirements.txt,
+README.md, src/}`. The official harness imports `starter.agent`, so we keep that
+path rather than renaming it and breaking the one command that scores us:
+
+| Recommended | Here |
+|---|---|
+| `agent.py` (exports `Agent`) | `starter/agent.py` |
+| `src/` (helper modules) | `copilot/` |
+| `requirements.txt` | `requirements.txt` (installs nothing) |
+| `README.md` | `README.md`, plus this file |
