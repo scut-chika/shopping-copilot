@@ -433,7 +433,7 @@ curl -L -o catalog.jsonl.gz \
 sha256sum -c --ignore-missing SHA256SUMS   # SHA256SUMS also lists the kit zip, which we do not need
 gzip -dk catalog.jsonl.gz && mv catalog.jsonl data/catalog.jsonl
 
-python -m evaluator.local_evaluator     # -> results.json, TechnicalScore 0.916014
+python -m evaluator.local_evaluator     # -> results.json, TechnicalScore 0.918872
 ```
 
 Python 3.10+, no third-party runtime dependencies.

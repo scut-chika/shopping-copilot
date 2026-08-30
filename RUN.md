@@ -33,8 +33,8 @@ gzip -dk catalog.jsonl.gz && mv catalog.jsonl data/catalog.jsonl
 python -m evaluator.local_evaluator
 ```
 
-Writes `results.json`. Expected: `recommended_technical_score` **0.916014**,
-Hit Rate@10 1.0, MRR 0.790046, MTTC 2.05, and `total_tokens` 0.
+Writes `results.json`. Expected: `recommended_technical_score` **0.918872**,
+Hit Rate@10 1.0, MRR 0.794573, MTTC 1.975, and `total_tokens` 0.
 
 ## Everything else
 
@@ -90,7 +90,7 @@ Reproduce with `python tools/memcheck.py` and `python tools/profile_cost.py`.
 ## Verified from a clean clone
 
 This exact sequence was run against a fresh `git clone` of the public repository
-on 30 Aug 2026 and reproduced `recommended_technical_score` **0.916014**, with
+on 30 Aug 2026 and reproduced `recommended_technical_score` **0.918872**, with
 all 16 tests passing. If it does not reproduce for you, that is a bug and we want
 to know.
 
