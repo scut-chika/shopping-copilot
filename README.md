@@ -600,10 +600,14 @@ third-party package ever appears. The single environment read is the `COPILOT_*`
 config-override mechanism; `test_agent_reads_no_secrets_from_environment` pins
 that it touches nothing else.
 
-### The optional LLM stage, and why it is off
+## The optional LLM stage, and why it is off
 
-`copilot/llm.py` is real, works, and is disabled in the submitted configuration.
-Two capabilities, both behind flags:
+The problem statement names *"Multi-Route Retrieval → **LLM Semantic Ranking**"*
+as the pipeline base, so this section answers that directly rather than leaving
+it to be inferred from a config flag.
+
+`copilot/llm.py` is real, works, was measured against a live model, and is
+disabled in the submitted configuration. Two capabilities, both behind flags:
 
 - **`use_llm_parse`** — when template parsing fails, ask a model which catalog
   constraint the reworded sentence came from.
