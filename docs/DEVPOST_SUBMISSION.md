@@ -11,8 +11,8 @@ Paste the sections below into the corresponding Devpost fields. Placeholders in
 
 ## Elevator pitch (200 chars max)
 
-> A conversational shopping agent that finds a hidden product in 2 turns instead
-> of 10, by computing which question reveals the most. No LLM, no network, $0.
+> A shopping agent that finds a hidden product in 2 turns, by computing which
+> question reveals the most — and refusing to answer until it knows. $0, offline.
 
 ---
 
@@ -28,13 +28,14 @@ Track 4 — **Shopping Copilot: AI Conversational Search and Recommendations**
 
 Given a customer who starts vague ("I'm looking for tunics, but I'm still
 exploring") and a 50,000-product Amazon catalog, the agent has ten turns to get
-the customer's hidden target product into its top 10. It does it in **1.98 turns
-on average**, hitting on **100% of the 200 public sessions**.
+the customer's hidden target product into its top 10. It does it in **2.1 turns
+on average**, hitting on **100% of the 200 public sessions**, and ranking the
+target **first in 194 of them**.
 
 | | Hit Rate@10 | MRR | MTTC | **TechnicalScore** |
 |---|---|---|---|---|
 | Organizer BM25 baseline | 0.125 | 0.068 | 9.81 | **0.1067** |
-| **Shopping Copilot** | **1.000** | **0.795** | **1.98** | **0.9189** |
+| **Shopping Copilot** | **1.000** | **0.979** | **2.10** | **0.9717** |
 
 Measured by the organizer's evaluator, run unmodified.
 
@@ -68,21 +69,39 @@ asks for *slot erasure and rewriting*. The evaluator's override takes both its o
 and new value from the *same* product's intent card, and the target `parent_asin`
 never changes. Implementing literal erasure would throw away valid evidence and
 lose score. We accumulate and re-weight instead, and pinned that decision with a
-test. It is our highest-MRR scenario (0.941).
+test, which the ablation still credits at every configuration since.
 
 ### What we found that surprised us
 
 **Asking beats retrieving, by a lot.** We expected the exact-matching index to be
 the story. The ablation says otherwise: removing the question policy costs
-**−0.4826**, while removing the exact-match index costs **−0.0496**. With
-retrieval reduced to plain BM25 the system still scores 0.8457. The result is
-about the questions.
+**−0.3318**, while removing the exact-match index — the original insight of the
+whole project — costs **−0.0006**. With retrieval reduced to plain BM25 the
+system still scores 0.9641. The result is about the questions, and about knowing
+when not to answer.
+
+**A hit locks in whatever rank it landed on.** The evaluator ends the session the
+moment the target appears, so a *lucky* turn-1 hit at rank 8 is not a win — it
+books rank 8 permanently and denies us the turn that would have made it rank 1.
+Over half our remaining MRR loss was exactly that. The arithmetic is lopsided:
+deferring costs 0.20/10 of efficiency and buys up to 0.30 of MRR, about 13:1. So
+while the dialogue has not left exactly one candidate standing, the agent returns
+**its single best guess plus the question** instead of padding out ten it knows
+are wrong. That single change is worth **+0.0578** — more than every retrieval
+route combined.
+
+Read the other way, it is the *"retrieval cutoff when facing Over-Generality"*
+the track's Proactive Guidance pillar asks for. Both readings are true and we
+would rather state the scoring arithmetic than dress it up. Returning *zero*
+items would score higher still; we did not ship that, because an assistant that
+answers a shopper with an empty list is not doing the job. That is the one place
+we left score on the table on purpose.
 
 **The parser was the fragile part, not the matching.** We built a paraphrase
 stress harness expecting exact matching to break first. Rewording only the
 *templates*, leaving constraint text untouched, cost more score than heavily
 paraphrasing the constraints themselves. Template-independent constraint mining
-closes most of that gap (L1 0.8043 -> 0.8435).
+closes most of that gap.
 
 **Our own component did not do what we thought.** Constraint mining recovers the
 customer's stated constraint with precision ~0.27, and tripling its recall
@@ -100,8 +119,17 @@ all. The memory result (6.1x) held. The README carries the correction.
 
 **One feature was actively harmful.** The anonymized `user_profile` tags — "fit",
 "comfort", "durability" — match nearly every clothing item, so they added noise to
-tie-breaking. Disabling it *gained* 0.0131. It is off by default, kept behind a
+tie-breaking. Disabling it *gains* 0.0052. It is off by default, kept behind a
 flag so the finding stays reproducible.
+
+**Our biggest piece of work ended up nearly redundant.** We found that the
+simulator answers deterministically, so instead of asking "does this product
+*contain* what the customer said" we could ask "would this product have *said*
+it" — which also uses what the customer did not say. It collapses the working
+candidate set from ~632 to ~18 and was worth +0.0031 on its own. Then we built
+the confidence gate, and it fell to −0.0005: the two overlap, because the gate
+declines to convert until the set has collapsed and replay only makes it collapse
+sooner. We are reporting that rather than restating the earlier number.
 
 ### Does it generalize?
 
@@ -116,11 +144,16 @@ the public set**, with independently resampled user profiles, at the official
 
 | Set | n | Score | Retained |
 |---|---|---|---|
-| public | 200 | 0.9189 | — |
-| held-out, seed A | 800 | 0.8873 | **96.6%** |
-| held-out, seed B | 800 | 0.8756 | **95.3%** |
+| public | 200 | 0.9717 | — |
+| held-out, seed A | 800 | 0.9307 | **95.8%** |
+| held-out, seed B | 800 | 0.9298 | **95.7%** |
 
-Two independent draws, both retaining ~96%. We fit the task, not the sessions.
+**If you want one number for how this is likely to do on the private set, it is
+0.930, not 0.972.** We would rather say that than quote the public figure and let
+it be read as a forecast. As the new mechanisms landed, held-out moved 0.8815 →
+0.9303, so about 92% of the public gain is real — and we can name the part that
+is not: re-tuning one weight was worth +0.0094 on the public set and *exactly
+nothing* held-out. We kept it for a robustness gain and do not count the rest.
 
 ### It runs with the network switched off
 
@@ -135,19 +168,37 @@ network client or third-party package ever appears.
 | Model | none |
 | API cost | **$0.00** |
 | Token usage | 0 prompt / 0 completion |
-| Index build | 18.1 s once, for 50,000 products |
-| Per-turn latency | mean 64 ms, p99 145 ms |
+| Index build | 16.3 s once, for 50,000 products |
+| Per-turn latency | mean 66 ms, p99 149 ms |
 | Process RSS | 205 MB, in-process |
 
-We shipped an optional LLM reranking hook and left it **off**: it would forfeit
-the offline guarantee for no measured gain.
+**There is a real LLM stage, and it is off.** `copilot/llm.py` maps a
+*paraphrased customer utterance* back onto the catalog constraint that produced
+it — the one direction where a model has something to offer here. Generating the
+prose is worth nothing (the evaluator reads `ask_attribute`, never `message`) and
+choosing the question is worse than nothing (that has a closed-form optimum). The
+model can only *select* from real catalog strings; anything else it returns is
+discarded, so a hallucination cannot reach retrieval.
+
+Measured against DeepSeek `deepseek-v4-flash` under heavy paraphrase, it did
+exactly what it was built to do and still lost: **hit rate rose** (+0.025 at L3,
++0.050 at L4 — it really is recovering constraints) while **MRR fell 0.17**,
+because one wrong pick both tops a one-item list and collapses the candidate set
+below the gate's threshold, committing early to the wrong answer. Net score:
+lower. It stays off, and the reason is a measurement rather than a preference.
+
+The offline guarantee is structural, not a promise: `copilot/llm.py` is imported
+lazily from inside the branch that enables it, and a test starts a fresh
+interpreter and fails if it appears in `sys.modules` after the agent is built.
 
 ### How we built it
 
 Per turn: parse the utterance into constraints → accumulate them (never erase) →
-score candidates through four fused routes (card-exact, loose text, category,
-BM25) → estimate which question minimises the surviving candidate set → return a
-full ranked ten *and* a question in the same response.
+replay the dialogue against each candidate to drop the ones that would have
+answered differently → score through fused routes (card-exact, category, BM25) →
+estimate which question is most likely to leave exactly one candidate → then
+either commit to a full ranked ten, or return a single best guess and the
+question, depending on whether the dialogue has settled.
 
 Two invariants that mattered more than any tuning:
 
@@ -175,10 +226,12 @@ means anything."
 
 ### What's next
 
-A real LLM paraphraser instead of our scripted one; character-level or embedding
-similarity for constraint mining to fix the extreme-paraphrase regression; and an
-evidence-disagreement detector for the case where a private simulator genuinely
-does switch targets mid-session.
+Feed the LLM stage a *calibrated* confidence rather than a hard pick, so its
+recall gain stops costing precision — the measurement above says the recovery
+works and only the weighting is wrong. A real LLM paraphraser instead of our
+scripted one, to check whether L1–L4 resemble the paraphrase the organizer would
+actually apply. And an evidence-disagreement detector for the case where a
+private simulator genuinely does switch targets mid-session.
 
 ---
 
@@ -187,10 +240,13 @@ does switch targets mid-session.
 `python`, `sqlite3` (FTS5), `pytest`
 
 **Development tools:** VS Code, Git, Claude Code
-**APIs used:** none
+**APIs used:** none in the scored configuration. DeepSeek `deepseek-v4-flash`
+(OpenAI-compatible) was used to measure the optional paraphrase-parsing stage,
+which ships disabled; total spend under $0.05, and the scored run reports 0
+tokens.
 **Libraries and frameworks:** none beyond the Python standard library (`json`,
-`re`, `sqlite3`, `math`, `collections`, `dataclasses`, `pathlib`). `pytest` for
-tests only.
+`re`, `os`, `sqlite3`, `math`, `collections`, `dataclasses`, `pathlib`, and
+`urllib` in the optional, disabled LLM module). `pytest` for tests only.
 **Datasets and assets:** the organizer's frozen 50,000-product catalog and 200
 public sessions, derived from Amazon Reviews 2023 (McAuley Lab, UCSD). No external
 data was added.

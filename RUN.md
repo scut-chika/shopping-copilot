@@ -33,8 +33,8 @@ gzip -dk catalog.jsonl.gz && mv catalog.jsonl data/catalog.jsonl
 python -m evaluator.local_evaluator
 ```
 
-Writes `results.json`. Expected: `recommended_technical_score` **0.918872**,
-Hit Rate@10 1.0, MRR 0.794573, MTTC 1.975, and `total_tokens` 0.
+Writes `results.json`. Expected: `recommended_technical_score` **0.971714**,
+Hit Rate@10 1.0, MRR 0.979048, MTTC 2.100, and `total_tokens` 0.
 
 ## Everything else
 
@@ -69,8 +69,8 @@ set (`results/cost_profile.json`, `results/memory_profile.json`):
 
 | | |
 |---|---|
-| Index build (once per process) | **18.1 s** |
-| Per-turn latency | mean 64 ms, p50 61 ms, p95 123 ms, p99 145 ms |
+| Index build (once per process) | **16.3 s** |
+| Per-turn latency | mean 66 ms, p50 64 ms, p95 117 ms, p99 149 ms |
 | Process RSS after index build | **205 MB** |
 | Python heap (tracemalloc peak) | **50.5 MB** |
 | LLM calls / tokens / cost | 0 / 0 / **$0.00** |
@@ -90,8 +90,8 @@ Reproduce with `python tools/memcheck.py` and `python tools/profile_cost.py`.
 ## Verified from a clean clone
 
 This exact sequence was run against a fresh `git clone` of the public repository
-on 30 Aug 2026 and reproduced `recommended_technical_score` **0.918872**, with
-all 16 tests passing. If it does not reproduce for you, that is a bug and we want
+on 31 Aug 2026 and reproduced `recommended_technical_score` **0.971714**, with
+all 22 tests passing. If it does not reproduce for you, that is a bug and we want
 to know.
 
 ## Mapping to the recommended submission layout
