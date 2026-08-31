@@ -186,14 +186,47 @@ class Config:
     use_prior: bool = True
     """Popularity/quality prior used to break ties inside a tier."""
 
+    profile_tiebreak_only: bool = True
+    """Let the profile speak only when the constraints have stopped speaking.
+
+    The tags do carry signal -- measured on the public set, a target's tag
+    overlap averages 0.371 against 0.237 for its own category peers, and the
+    target beats its peers in 135 of 200 sessions. The earlier claim that they
+    "match almost every clothing item" was wrong.
+
+    The reason enabling them still cost 0.0052 is that on the public set the
+    target is already ranked first in 194 of 200 sessions. A signal that points
+    the right way two times in three, applied to a ranking that is already right
+    97% of the time, disturbs more correct answers than it fixes.
+
+    So apply it only where the ranking is *not* already decided: when a large
+    group of candidates is tied on constraint evidence, which is exactly the
+    situation in the held-out sessions we never convert (target at median rank
+    85 among products matching identical constraints).
+    """
+
+    profile_tiebreak_threshold: int = 10
+    """Tier size above which the ranking counts as undecided."""
+
     use_profile: bool = False
     """Anonymized user_profile preference tags as a soft ranking signal.
 
-    Off by default because the ablation measured it as a *net negative*
-    (+0.0131 TechnicalScore when disabled): the tags are coarse ("fit",
-    "comfort", "durability") and match almost every clothing item, so they add
-    noise to tie-breaking rather than signal.  Kept behind a flag rather than
-    deleted so the finding stays reproducible.
+    Off by default, but *not* for the reason we first published. The original
+    explanation -- that the tags are coarse and "match almost every clothing
+    item, so they add noise rather than signal" -- is measurably wrong. On the
+    public set a target's tag overlap averages 0.371 against 0.237 for its own
+    category peers, and the target beats its peers in 135 of 200 sessions. The
+    tags carry real signal.
+
+    It is off because the signal has nowhere to go. The target is already ranked
+    first in 194 of 200 public sessions, so a cue that points the right way two
+    times in three disturbs more correct rankings than it repairs: -0.0052 when
+    applied throughout, -0.0043 restricted to undecided tiers.
+
+    On held-out targets the sign flips (+0.0040), and we do not act on that,
+    because the held-out harness synthesizes profiles by drawing tags from the
+    target's own text. That is a construction leak rather than a measurement, and
+    the one dataset with genuine profiles says negative. See `tools/generalize.py`.
     """
 
     # ---- fusion weights ---------------------------------------------------

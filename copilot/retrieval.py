@@ -96,6 +96,14 @@ def _top_k(index, state: SessionState, config: Config, scores, top_k: int) -> li
     pool = sorted(scores.items(), key=lambda kv: -kv[1])[: config.candidate_pool]
 
     tags = state.preference_tags if config.use_profile else []
+    if tags and config.profile_tiebreak_only:
+        # Only once the constraints have stopped separating candidates. Below
+        # this, the ranking is already decided and the profile can only disturb
+        # it; above it, the profile is the only signal left.
+        threshold = pool[0][1] - config.tier_weight * 0.5
+        tied = sum(1 for _, value in pool if value >= threshold)
+        if tied <= config.profile_tiebreak_threshold:
+            tags = []
     adjusted: list[tuple[float, str]] = []
     for asin, base in pool:
         total = base

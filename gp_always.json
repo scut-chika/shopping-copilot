@@ -1,0 +1,72 @@
+{
+  "seed": 20260830,
+  "public": {
+    "n": 200,
+    "hit_rate": 1.0,
+    "mrr": 0.967042,
+    "mttc": 2.18,
+    "efficiency": 0.882,
+    "technical_score": 0.966513,
+    "by_scenario": {
+      "boundary": {
+        "n": 10,
+        "hit_rate": 1.0,
+        "mrr": 1.0,
+        "mttc": 2.5
+      },
+      "browsing": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.947292,
+        "mttc": 2.125
+      },
+      "buying": {
+        "n": 80,
+        "hit_rate": 1.0,
+        "mrr": 0.98125,
+        "mttc": 1.65
+      },
+      "intent_override": {
+        "n": 30,
+        "hit_rate": 1.0,
+        "mrr": 0.970833,
+        "mttc": 3.633333
+      }
+    }
+  },
+  "holdout": {
+    "n": 800,
+    "hit_rate": 0.98,
+    "mrr": 0.924352,
+    "mttc": 2.62125,
+    "efficiency": 0.837875,
+    "technical_score": 0.934881,
+    "by_scenario": {
+      "boundary": {
+        "n": 40,
+        "hit_rate": 0.975,
+        "mrr": 0.819087,
+        "mttc": 3.6
+      },
+      "browsing": {
+        "n": 320,
+        "hit_rate": 0.990625,
+        "mrr": 0.959028,
+        "mttc": 2.39375
+      },
+      "buying": {
+        "n": 320,
+        "hit_rate": 0.96875,
+        "mrr": 0.901406,
+        "mttc": 2.3
+      },
+      "intent_override": {
+        "n": 120,
+        "hit_rate": 0.983333,
+        "mrr": 0.928158,
+        "mttc": 3.758333
+      }
+    }
+  },
+  "gap": -0.031632
+}

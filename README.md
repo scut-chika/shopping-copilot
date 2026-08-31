@@ -373,9 +373,15 @@ row; `tools/ablation.py` now marks each result with `rebuilt_index`.
 
 Things we changed because of this table, not because they sounded good:
 
-- **`user_profile` is off by default.** It is a *net negative*. The anonymized
-  tags ("fit", "comfort", "durability") match nearly every clothing item, so they
-  add noise to tie-breaking. Kept behind a flag so the finding stays reproducible.
+- **`user_profile` is off by default — and our published reason for that was
+  wrong.** We claimed the anonymized tags "match nearly every clothing item, so
+  they add noise rather than signal". Measured: a target's tag overlap averages
+  **0.371 against 0.237 for its own category peers**, and the target beats its
+  peers in **135 of 200** sessions. The tags carry real signal. It is off because
+  the signal has nowhere to go — the target is already ranked first in 194 of 200
+  sessions, so a cue that is right two times in three disturbs more correct
+  rankings than it repairs. Restricting it to undecided tiers only recovers
+  0.0009 of the 0.0052. The flag stays; the explanation is corrected.
 - **Constraint mining is free here** (±0.0000) and worth up to +0.039 under
   paraphrase. It used to cost 0.0029; understanding what it actually does removed
   that cost. See [What constraint mining actually does](#what-constraint-mining-actually-does).
@@ -689,6 +695,15 @@ Python 3.10+, no third-party runtime dependencies.
   the targets and the users, which is the property we most needed to test, but it
   reuses the organizer's own `intent_card` derivation. If the private set's
   generator differs in some way we cannot see, that difference is invisible to us.
+- **The held-out harness cannot adjudicate profile-dependent features.** Its
+  `preference_tags` were originally drawn at random, which zeroed the signal by
+  construction; they now correlate with the target, but only because we *ground
+  them in the target's own text*. That is a leak, not an observation. It reproduces
+  the aggregate statistics of the real tags and still understates their
+  discriminative power (target beats peers 44.6% of the time, against 67.5% on the
+  public set), so any profile result it produces is directional at best. This is
+  why the `use_profile` decision is made on public-set evidence even though
+  held-out disagrees.
 - **We never tested against a real LLM paraphraser**, only a scripted one. The
   robustness levels are our best construction of what paraphrasing does, not an
   observation of it. This is the first thing we would add with more time. (We did
