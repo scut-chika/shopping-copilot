@@ -15,7 +15,7 @@ Text: [`docs/DEVPOST_SUBMISSION.md`](docs/DEVPOST_SUBMISSION.md).
 | Libraries and frameworks used | "Built with" — Python standard library only; `pytest` for tests |
 | Datasets and assets used | "Built with" — the organizer's frozen catalog and public sessions |
 
-**Still needs:** the YouTube URL, at `{{ YOUTUBE_URL }}` (line 267).
+Complete. Demo video linked: <https://youtu.be/sgenegmZxXo>
 
 ## 2. Public GitHub repository — done
 
@@ -30,14 +30,16 @@ Text: [`docs/DEVPOST_SUBMISSION.md`](docs/DEVPOST_SUBMISSION.md).
 | README: limitations and what we would improve | `README.md` → Limitations |
 | README: team member contributions | Not applicable — the list says *"if applicable, i.e. team participants, non-solo participants"*. Authorship is recorded anyway under Author. |
 
-## 3. Demo video — NOT DONE
+## 3. Demo video — recorded, one step left
 
-Mandatory. The deliverables list requires a short video that:
+<https://youtu.be/sgenegmZxXo>
 
-- [ ] demonstrates the solution working end to end
-- [ ] is uploaded to YouTube and set to **public** visibility (not unlisted)
-- [ ] is linked in the Devpost description
-- [ ] contains no third-party trademarks or copyrighted content
+- [x] demonstrates the solution working end to end
+- [x] uploaded to YouTube
+- [ ] **set to public visibility** — still private at time of writing. The rule is
+      *"set to public visibility"*, so "unlisted" does not satisfy it.
+- [x] linked in the Devpost description
+- [x] contains no third-party trademarks or copyrighted content
 
 A terminal walkthrough is explicitly acceptable here: *"Note for backend/NLP
 tracks: if a front-end interface is not applicable to your solution, a

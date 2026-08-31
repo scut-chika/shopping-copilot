@@ -1,7 +1,7 @@
 # Devpost submission text
 
 Paste the sections below into the corresponding Devpost fields. Placeholders in
-`{{ }}` need filling before submitting.
+Everything below is filled in; nothing is left to substitute.
 
 ---
 
@@ -264,7 +264,7 @@ data was added.
 ## Links
 
 - **Repository:** https://github.com/scut-chika/shopping-copilot
-- **Demo video:** {{ YOUTUBE_URL }}
+- **Demo video:** https://youtu.be/sgenegmZxXo
 
 ## Team
 
