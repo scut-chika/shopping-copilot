@@ -33,3 +33,6 @@ catalog.jsonl.gz
 /sweep*.json
 /ablation.json
 /rb_*.json
+/gen_*.json
+/gp_*.json
+/holdout_*.jsonl
