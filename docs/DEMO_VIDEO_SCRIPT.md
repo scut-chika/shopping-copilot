@@ -7,11 +7,30 @@ this is a terminal recording, not a product demo.
 **Hard limits:** under 3:00, uploaded to YouTube, set to **Public**, linked in the
 Devpost description. No third-party trademarks or copyrighted music.
 
+**Easiest path: one command, one take, no editing**
+
+```bash
+python tools/record.py
+```
+
+It builds the index first and *then* waits for you to start recording, so the
+17-second build never appears. After that it walks all five shots below, pausing
+on Enter between each one and between every turn of the live session, so you
+narrate at your own pace. Every number it prints is read from `results/`, so the
+recording cannot disagree with the repository.
+
+`--scenario {buying,browsing,intent_override,boundary}` and `--index N` pick a
+different session if you want a different one on camera.
+
 **Setup before recording**
 - Terminal at ~110×32, large readable font, light or dark but high contrast.
-- Pre-warm: run each command once first so the ~17 s index build is not on camera
-  (or cut it — see Shot 2).
-- Have `results/` open in a second tab for the numbers.
+- Close anything showing an API key, token, or personal path.
+- If you record the shots manually instead, pre-warm each command once so the
+  ~17 s index build is not on camera.
+
+**Recording on Windows 11** — no third-party tool needed. Press `Win`+`Alt`+`R`
+to start and stop the Game Bar recorder, or open **Snipping Tool** and switch it
+to record. Both write an MP4 that YouTube accepts as-is.
 
 ---
 
