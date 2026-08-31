@@ -581,11 +581,31 @@ promise: `copilot/llm.py` is imported lazily from inside the enabling branch, an
 `test_llm_stage_is_never_loaded_by_default` starts a fresh interpreter and fails
 if `copilot.llm` appears in `sys.modules` after the agent is built.
 
-Measured against DeepSeek `deepseek-v4-flash`; the numbers are in
-[Robustness](#robustness-to-paraphrasing). One implementation note worth
-recording: it is a reasoning model, and `max_tokens` bounds the reasoning trace
-*plus* the answer. At 512 roughly a third of calls returned an empty string with
-no error at all — not a truncated answer, no answer. The budget is 2048.
+**Measured, on 40 sessions per cell against DeepSeek `deepseek-v4-flash`:**
+
+| | L3 | L4 |
+|---|---|---|
+| LLM off | 0.8600 | **0.8314** |
+| LLM on, answer injected at full weight | 0.7823 | 0.7803 |
+| LLM on, answer weighted as a guess | **0.8782** | 0.8206 |
+
+The first version was a clean failure with a clean cause. Hit rate *rose* at both
+levels (+0.025 at L3, +0.050 at L4) — the model really is recovering constraints
+the parser lost — but MRR fell 0.17 and the net score went down. The mistake was
+ours: we injected the model's answer at full weight, as though the customer had
+said it. Under the confidence gate one wrong pick both tops a one-item list and
+collapses the candidate set below the commit threshold, so the agent converges
+early on the wrong product. Weighting it like a mined guess flips L3 to +0.018;
+L4 still slips 0.011.
+
+It stays off in the shipped configuration for three reasons, in order: official
+scoring may disable the network, the official wording parses without it so it
+would never fire, and a call costs 1–8 s against a 66 ms turn.
+
+One implementation note worth recording: it is a reasoning model, and `max_tokens`
+bounds the reasoning trace *plus* the answer. At 512 roughly a third of calls
+returned an empty string with no error at all — not a truncated answer, no
+answer. The budget is 2048.
 
 `retrieve()` scores candidates once per turn instead of once for ranking and
 again for question estimation; that change did reduce latency, measured before

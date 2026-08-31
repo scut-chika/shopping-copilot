@@ -180,12 +180,19 @@ choosing the question is worse than nothing (that has a closed-form optimum). Th
 model can only *select* from real catalog strings; anything else it returns is
 discarded, so a hallucination cannot reach retrieval.
 
-Measured against DeepSeek `deepseek-v4-flash` under heavy paraphrase, it did
-exactly what it was built to do and still lost: **hit rate rose** (+0.025 at L3,
-+0.050 at L4 — it really is recovering constraints) while **MRR fell 0.17**,
-because one wrong pick both tops a one-item list and collapses the candidate set
-below the gate's threshold, committing early to the wrong answer. Net score:
-lower. It stays off, and the reason is a measurement rather than a preference.
+Measured against DeepSeek `deepseek-v4-flash` under heavy paraphrase, the first
+version did exactly what it was built to do and still lost: **hit rate rose**
+(+0.025 at L3, +0.050 at L4 — it really is recovering constraints) while **MRR
+fell 0.17**. The cause was ours, not the model's: we were injecting its answer at
+full weight, as though the customer had said it. One wrong pick then both tops a
+one-item list and collapses the candidate set below the gate's threshold,
+committing early to the wrong answer.
+
+Weighting it as a *guess* instead flipped the result — L3 0.8600 → **0.8782**,
+though L4 still slips 0.8314 → 0.8206 (40 sessions per cell; small). So the stage
+works, and it stays off anyway: official scoring may disable the network, the
+official wording never triggers it, and each call costs 1–8 s against a 66 ms
+turn. That is a measurement, not a preference.
 
 The offline guarantee is structural, not a promise: `copilot/llm.py` is imported
 lazily from inside the branch that enables it, and a test starts a fresh
@@ -240,10 +247,11 @@ private simulator genuinely does switch targets mid-session.
 `python`, `sqlite3` (FTS5), `pytest`
 
 **Development tools:** VS Code, Git, Claude Code
-**APIs used:** none in the scored configuration. DeepSeek `deepseek-v4-flash`
-(OpenAI-compatible) was used to measure the optional paraphrase-parsing stage,
-which ships disabled; total spend under $0.05, and the scored run reports 0
-tokens.
+**APIs used:** none in the scored configuration, which reports 0 tokens. DeepSeek
+`deepseek-v4-flash` (OpenAI-compatible) was used only to measure the optional
+paraphrase-parsing stage, which ships disabled. Measured cost per call: ~220
+prompt + ~220 completion tokens; we did not instrument the total for the A/B run
+and so do not quote a dollar figure.
 **Libraries and frameworks:** none beyond the Python standard library (`json`,
 `re`, `os`, `sqlite3`, `math`, `collections`, `dataclasses`, `pathlib`, and
 `urllib` in the optional, disabled LLM module). `pytest` for tests only.

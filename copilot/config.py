@@ -301,8 +301,16 @@ class Config:
     string that produced it.
 
     The model only ever *selects* from a shortlist of real catalog constraints;
-    anything else it says is discarded. Off for scoring because official runs may
-    have the network disabled.
+    anything else it says is discarded.
+
+    Measured against DeepSeek `deepseek-v4-flash`, 40 sessions per cell: L3 0.8600
+    -> 0.8782, L4 0.8314 -> 0.8206. It genuinely recovers constraints -- hit rate
+    rises at both levels -- but only once its answer is weighted as a guess. At
+    full weight it *cost* 0.17 of MRR.
+
+    Off by default regardless: official scoring may have the network disabled,
+    the official wording parses without it so it would never fire, and a call
+    costs 1-8 s against a 66 ms turn.
     """
 
     use_llm_rerank: bool = False
