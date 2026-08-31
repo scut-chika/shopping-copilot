@@ -247,7 +247,7 @@ reset(session_id, profile)
         │
         ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ Offline, once at startup  (copilot/catalog.py, ~32s)        │
+│ Offline, once at startup  (copilot/catalog.py, ~17s)        │
 │   card index      constraint string → products              │
 │   loose index     raw feature/detail string → products      │
 │   category index  coarse category → products                │
@@ -272,12 +272,24 @@ reset(session_id, profile)
 │    R4 BM25        ─┘  lexicographic in "constraints matched"│
 │                       and prior/BM25 break ties inside it   │
 ├─────────────────────────────────────────────────────────────┤
-│ 4. Ask              copilot/questions.py                    │
-│    argmin over attributes of expected surviving candidates  │
+│ 4. Replay           copilot/replay.py                       │
+│    Demote candidates that would have answered our earlier   │
+│    questions differently -- including "it would have said   │
+│    more" and "it said there was nothing more".              │
+├─────────────────────────────────────────────────────────────┤
+│ 5. Ask              copilot/questions.py                    │
+│    argmax over attributes of P(one candidate left)          │
+├─────────────────────────────────────────────────────────────┤
+│ 6. Commit or defer  copilot/agent.py                        │
+│    One candidate left  -> full ranked ten.                  │
+│    Still ambiguous     -> best guess only, plus the         │
+│                           question. A hit books its rank    │
+│                           permanently, so converting while  │
+│                           guessing is a loss, not a win.    │
 └─────────────────────────────────────────────────────────────┘
         │
         ▼
-{message, ask_attribute, recommendations[10]}
+{message, ask_attribute, recommendations[1 or 10]}
 ```
 
 ### Two invariants worth calling out
@@ -679,7 +691,10 @@ Python 3.10+, no third-party runtime dependencies.
   generator differs in some way we cannot see, that difference is invisible to us.
 - **We never tested against a real LLM paraphraser**, only a scripted one. The
   robustness levels are our best construction of what paraphrasing does, not an
-  observation of it. This is the first thing we would add with more time.
+  observation of it. This is the first thing we would add with more time. (We did
+  measure a real model on the *reading* side — see
+  [the optional LLM stage](#the-optional-llm-stage-and-why-it-is-off) — but that
+  tests recovery from our paraphrase, not whether our paraphrase is realistic.)
 - **Intent Override is handled as the evaluator behaves, not as the prompt
   describes.** If the private simulator genuinely switches targets mid-session,
   accumulate-don't-erase becomes wrong. The fix would be to detect a sustained
@@ -693,9 +708,17 @@ Python 3.10+, no third-party runtime dependencies.
   overlaps the turn" is a description of its effect rather than a principled
   mechanism. A properly calibrated soft-match score would likely beat it; we ran
   out of time to build one that keeps the zero-dependency property.
-- **The L4 gap is closed but not eliminated.** At the most extreme perturbation
-  mining still trails disabling it by 0.007, down from 0.050. We ship it on
-  because it wins by 0.035-0.039 at the levels that resemble real paraphrasing.
+- **The confidence gate is the largest single component and the least
+  conventional.** It is worth −0.0578 in the ablation, and it works by declining
+  to answer. If the private evaluator scored partial answers differently — for
+  instance by penalising short lists — that entire gain would invert. Nothing in
+  the specification suggests it does (`up to 10` is explicit, and only the first
+  ten valid unique IDs are scored), but it is a single assumption carrying a lot
+  of weight, and `COPILOT_USE_CONFIDENCE_GATE=0` reverts it.
+
+- **The public score is not a forecast.** Held-out is 0.930 against 0.972 public,
+  and one of our late changes gained on the public set and nothing held-out. We
+  quote 0.930 as the expectation and treat the difference as fitted.
 - **`boundary` is our weakest scenario on held-out data** (hit 0.950, MRR 0.65–0.68
   against 0.85 on the public set). It is only 5% of sessions and n=40 per draw, so
   the estimate is noisy, but it is the one place the held-out gap is consistent
