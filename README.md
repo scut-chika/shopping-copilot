@@ -22,9 +22,9 @@ Official evaluator, run unmodified (`python -m evaluator.local_evaluator`), 200 
 | | Hit Rate@10 | MRR | MTTC | Efficiency | **TechnicalScore** |
 |---|---|---|---|---|---|
 | Organizer BM25 baseline | 0.125 | 0.0680 | 9.81 | 0.119 | **0.1067** |
-| **Shopping Copilot** | **1.000** | **0.9614** | **2.31** | **0.8695** | **0.9623** |
+| **Shopping Copilot** | **1.000** | **0.9790** | **2.10** | **0.8900** | **0.9717** |
 
-The target is ranked **first in 190 of 200 sessions**, and never below tenth.
+The target is ranked **first in 194 of 200 sessions**, and never below tenth.
 
 By scenario — token usage **0 prompt, 0 completion**:
 
@@ -61,20 +61,27 @@ scenario mix.
 
 | Set | n | Score | Hit Rate@10 | MRR | MTTC | Retained |
 |---|---|---|---|---|---|---|
-| public | 200 | 0.9623 | 1.000 | 0.961 | 2.31 | — |
-| held-out, seed 20260830 | 800 | **0.9311** | 0.978 | 0.919 | 2.66 | **96.8%** |
-| held-out, seed 7 | 800 | **0.9291** | 0.974 | 0.921 | 2.70 | **96.5%** |
+| public | 200 | 0.9717 | 1.000 | 0.979 | 2.10 | — |
+| held-out, seed 20260830 | 800 | **0.9307** | 0.979 | 0.916 | 2.67 | **95.8%** |
+| held-out, seed 7 | 800 | **0.9298** | 0.975 | 0.922 | 2.71 | **95.7%** |
 
-Two independent draws of 800 unseen targets, both retaining ~96.5%. The approach
-generalizes to the task rather than to the sessions we can see. Reproduce with
+Two independent draws of 800 unseen targets. Reproduce with
 `python tools/generalize.py --sessions 800 [--seed N]`.
 
-This is also the check that mattered most for the two mechanisms described
-below, both of which read the simulator's behaviour closely enough that
-overfitting was the obvious risk. Retention did not fall when they were added —
-it rose, from 96.6%/95.3% to 96.8%/96.5%, while the held-out score itself went
-from 0.8873/0.8756 to 0.9311/0.9291. What was learned was the task, not the
-sessions.
+**If you want one number for how this is likely to do on the private set, it is
+0.930, not 0.972.** We would rather say that than quote the public figure and let
+it be read as a forecast.
+
+This is the check that mattered most, because the mechanisms below read the
+simulator's behaviour closely enough that overfitting was the obvious risk. The
+held-out score moved **0.8815 → 0.9303** (mean of the two seeds) as they were
+added, so roughly 92% of the public-set gain is real.
+
+The exception is worth naming. Re-tuning `bm25_weight` was worth +0.0094 on the
+public set and **exactly nothing** on held-out targets — held-out sits at 0.930
+whether the weight is 5, 10, or 30. That change is kept because it costs nothing
+held-out and gains 0.017–0.062 at every paraphrase level, but the public-set
+portion of its gain is fitted to those 200 sessions and we do not count it.
 
 This isolates one axis — unseen targets. It deliberately holds the *generator*
 fixed, so it says nothing about organizer paraphrasing; that is measured
@@ -291,46 +298,61 @@ time, official protocol, 200 sessions:
 
 | Variant | Score | Δ | Hit | MRR | MTTC |
 |---|---|---|---|---|---|
-| **full system** | **0.9623** | — | 1.000 | 0.9614 | 2.31 |
-| questions: none | 0.4363 | **−0.5260** | 0.480 | 0.3569 | 6.54 |
-| − confidence gate | 0.9215 | **−0.0408** | 1.000 | 0.8034 | 1.98 |
-| gate: show 3, not 1 | 0.9426 | −0.0197 | 1.000 | 0.8830 | 2.12 |
-| − popularity prior | 0.9494 | −0.0129 | 1.000 | 0.9391 | 2.62 |
-| questions: fixed cycle | 0.9521 | −0.0102 | 0.995 | 0.9456 | 2.46 |
-| retrieval: BM25 only | 0.9524 | −0.0099 | 0.990 | 0.9561 | 2.47 |
-| − category filter | 0.9525 | −0.0098 | 0.990 | 0.9561 | 2.47 |
-| questions: always `other` | 0.9558 | −0.0065 | 0.990 | 0.9597 | 2.36 |
-| questions: EIG without `other` | 0.9569 | −0.0054 | 1.000 | 0.9505 | 2.41 |
-| objective: expected size | 0.9614 | −0.0009 | 1.000 | 0.9580 | 2.30 |
-| − card-exact index | 0.9619 | −0.0004 | 1.000 | 0.9614 | 2.33 |
-| − replay consistency | 0.9619 | −0.0004 | 1.000 | 0.9614 | 2.33 |
-| + user profile *(default off)* | 0.9621 | −0.0002 | 1.000 | 0.9627 | 2.34 |
-| − constraint mining / mining ungated | 0.9623 | ±0.0000 | 1.000 | 0.9614 | 2.31 |
-| replay: hard filter *(default off)* | 0.9623 | ±0.0000 | 1.000 | 0.9614 | 2.31 |
-| gate: stop after parse failure *(default off)* | 0.9623 | ±0.0000 | 1.000 | 0.9614 | 2.31 |
-| estimator sees `seen` / `disclosed` | 0.9623 | ±0.0000 | 1.000 | 0.9614 | 2.31 |
-| + loose index / + retain raw products *(default off)* | 0.9623 | ±0.0000 | 1.000 | 0.9614 | 2.31 |
-| **− BM25 route** | **0.9736** | **+0.0113** | 1.000 | 0.9800 | 2.02 |
+| **full system** | **0.9717** | — | 1.000 | 0.9790 | 2.10 |
+| questions: none | 0.6399 | **−0.3318** | 0.710 | 0.4997 | 4.25 |
+| − confidence gate | 0.9139 | **−0.0578** | 1.000 | 0.7594 | 1.70 |
+| gate: show 3, not 1 | 0.9458 | −0.0259 | 1.000 | 0.8782 | 1.89 |
+| − popularity prior | 0.9494 | −0.0223 | 1.000 | 0.9391 | 2.62 |
+| retrieval: BM25 only | 0.9641 | −0.0076 | 0.995 | 0.9749 | 2.30 |
+| − category filter | 0.9654 | −0.0064 | 0.995 | 0.9748 | 2.23 |
+| + user profile *(default off)* | 0.9665 | −0.0052 | 1.000 | 0.9670 | 2.18 |
+| questions: fixed cycle | 0.9669 | −0.0048 | 1.000 | 0.9687 | 2.19 |
+| questions: EIG without `other` | 0.9676 | −0.0041 | 1.000 | 0.9705 | 2.18 |
+| − card-exact index | 0.9711 | −0.0006 | 1.000 | 0.9790 | 2.13 |
+| − replay consistency | 0.9712 | −0.0005 | 1.000 | 0.9790 | 2.13 |
+| questions: always `other` | 0.9714 | −0.0003 | 1.000 | 0.9782 | 2.11 |
+| mining ungated | 0.9716 | −0.0001 | 1.000 | 0.9790 | 2.11 |
+| replay: hard filter *(default off)* | 0.9717 | ±0.0000 | 1.000 | 0.9790 | 2.10 |
+| gate: stop after parse failure *(default off)* | 0.9717 | ±0.0000 | 1.000 | 0.9790 | 2.10 |
+| estimator sees `seen` / `disclosed` | 0.9717 | ±0.0000 | 1.000 | 0.9790 | 2.10 |
+| + loose index / + retain raw products *(default off)* | 0.9717 | ±0.0000 | 1.000 | 0.9790 | 2.10 |
+| − constraint mining | 0.9718 | +0.0001 | 1.000 | 0.9790 | 2.10 |
+| objective: expected size | 0.9718 | +0.0001 | 1.000 | 0.9790 | 2.10 |
+| − BM25 route | 0.9736 | +0.0019 | 1.000 | 0.9800 | 2.02 |
 
-**Two rows here are uncomfortable, and both are load-bearing.**
+**Asking is still the whole story, but the gate is now the second pillar.**
+Removing the question policy costs −0.3318; removing the confidence gate costs
+−0.0578; every retrieval route put together costs less than either.
 
-**Removing BM25 *improves* the clean-set score by 0.0113.** It is not a bug: with
-the confidence gate refusing to commit until one candidate is left, a fuzzy
-lexical signal that nudges the wrong product to the top is worse than no signal.
-BM25 earns its place elsewhere — it is the route that keeps working when the
-customer is paraphrased — so this is a straight trade of clean-set score for
-robustness, quantified in [Robustness](#robustness-to-paraphrasing) rather than
-resolved by taste.
+**Three rows are uncomfortable and none of them are hidden.**
 
-**Replay consistency is worth −0.0004 here, after being worth +0.0031 on its
-own.** Measured before the confidence gate existed, replaying the dialogue
-against candidates was a real gain; measured after, it is inside the noise. The
-two mechanisms overlap: replay makes the candidate set collapse faster, and the
-gate stops us converting until it has. Once you have the gate, you have most of
-what replay was buying. That is worth stating plainly — it was the larger piece
-of work and it ended up nearly redundant. It stays in because it is what the
-generalization and robustness runs were validated with, and because it is the
-part of the design that would survive if the gate ever had to be turned off.
+**`− card-exact index` costs 0.0006.** The exact inverted index was the original
+insight of this project and, in the finished system, removing it is almost free.
+The questions and the gate together do the work; the index only makes them
+converge slightly sooner. It stays because it is what makes the candidate set
+small enough for the question estimator to be cheap, and because it is the route
+that does not depend on the gate.
+
+**`− replay consistency` costs 0.0005, after being worth +0.0031 on its own.**
+Replaying the dialogue against candidates — asking "would this product have
+*said* that?" instead of "does it contain that?" — collapses the working
+candidate set from ~632 to ~18 and was measured as a real gain before the
+confidence gate existed. After the gate, it is inside the noise: the two overlap,
+because the gate declines to convert until the set has collapsed and replay makes
+it collapse sooner. That was the larger piece of work and it ended up nearly
+redundant. It stays because it is what the generalization and robustness runs
+were validated with, and because it is what would carry the system if the gate
+ever had to come off.
+
+**`objective: expected size` costs −0.0001, i.e. the convergence objective now
+gains nothing.** It was worth +0.0009 when it was measured, and re-tuning
+`bm25_weight` afterwards absorbed it. The earlier figure is not restated as if it
+still held.
+
+**`− BM25 route` still *gains* 0.0019**, down from +0.0113 before the weight was
+re-tuned. Deleting the route would cost 0.065 at L3 and 0.068 at L4, so this is a
+trade quantified in [Robustness](#robustness-to-paraphrasing) rather than settled
+here.
 
 Four flags change how the *index* is built rather than how a request is served,
 so those variants rebuild the index instead of reusing a shared one. An earlier
@@ -365,11 +387,11 @@ protocol while rewriting every customer utterance:
 
 | Level | Perturbation | Shipped | Previous version |
 |---|---|---|---|
-| L0 | official wording | **0.9623** | 0.9189 |
-| L1 | every template reworded, constraints verbatim | **0.8810** | 0.8435 |
-| L2 | L1 + surface edits (case, punctuation) | **0.8793** | 0.8418 |
-| L3 | L1 + 25% of constraint words dropped | **0.8522** | 0.8172 |
-| L4 | L1 + 40% dropped and word order shuffled | 0.7392 | **0.7514** |
+| L0 | official wording | **0.9717** | 0.9189 |
+| L1 | every template reworded, constraints verbatim | **0.9052** | 0.8435 |
+| L2 | L1 + surface edits (case, punctuation) | **0.9023** | 0.8418 |
+| L3 | L1 + 25% of constraint words dropped | **0.8755** | 0.8172 |
+| L4 | L1 + 40% dropped and word order shuffled | **0.7678** | 0.7514 |
 
 **The parser was the weak link, not the matching.** An early version lost more
 score from rewording the templates alone (L0→L1, −0.166) than from heavily
@@ -377,12 +399,15 @@ paraphrasing the constraints inside them. That was not the failure mode we
 expected. Constraint mining — recovering constraints by token overlap rather than
 template match — closes about half that gap.
 
-**L4 is the one regression, and it is on the record.** At 40% of words dropped
-*and* shuffled, the confidence gate costs 0.005 and the convergence objective
-about 0.004. That is the price of +0.035 to +0.043 at every other level,
-including the one the organizer would actually score. Both are single environment
-variables (`COPILOT_USE_CONFIDENCE_GATE=0`,
-`COPILOT_QUESTION_OBJECTIVE=expected_size`) if that trade is ever the wrong one.
+**L4 was a regression for most of a day, and the fix came from the ablation.**
+The confidence gate costs 0.005 at L4 and the convergence objective about 0.004,
+which for a while left L4 the one level below where it started. The row that
+resolved it looked unrelated: at the old `bm25_weight` of 30, *removing* BM25
+outright gained 0.0113 on clean text. The gate had changed what a fuzzy signal is
+worth — when you show ten items a lexical nudge is nearly free, when you commit
+to one a nudge toward the wrong product costs the session. Re-tuning the weight
+to 5 rather than deleting the route gained at **every** level at once (see
+[Ablation](#ablation)), and carried L4 past its old figure as well.
 
 **A hypothesis this table killed.** The confidence gate looked dangerous under
 paraphrase: withholding the list bets on one more question settling the session,

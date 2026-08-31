@@ -1,0 +1,44 @@
+[
+  {
+    "bm25_weight": 0,
+    "technical_score": 0.9736,
+    "hit_rate": 1.0,
+    "mrr": 0.98,
+    "mttc": 2.02
+  },
+  {
+    "bm25_weight": 2,
+    "technical_score": 0.9727,
+    "hit_rate": 1.0,
+    "mrr": 0.98,
+    "mttc": 2.065
+  },
+  {
+    "bm25_weight": 5,
+    "technical_score": 0.971714,
+    "hit_rate": 1.0,
+    "mrr": 0.979048,
+    "mttc": 2.1
+  },
+  {
+    "bm25_weight": 10,
+    "technical_score": 0.969227,
+    "hit_rate": 1.0,
+    "mrr": 0.974423,
+    "mttc": 2.155
+  },
+  {
+    "bm25_weight": 20,
+    "technical_score": 0.964427,
+    "hit_rate": 1.0,
+    "mrr": 0.966089,
+    "mttc": 2.27
+  },
+  {
+    "bm25_weight": 30,
+    "technical_score": 0.962308,
+    "hit_rate": 1.0,
+    "mrr": 0.961359,
+    "mttc": 2.305
+  }
+]

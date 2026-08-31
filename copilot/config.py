@@ -204,7 +204,23 @@ class Config:
     """A loose (raw-text) constraint match counts less than a card match."""
 
     category_weight: float = 400.0
-    bm25_weight: float = 30.0
+
+    bm25_weight: float = 5.0
+    """Weight of the BM25 route's rank signal.
+
+    Re-tuned after the confidence gate landed, because the gate changed what a
+    fuzzy signal is worth. When the agent showed ten items, a lexical nudge that
+    surfaced a plausible product was nearly free; now that it commits to one, a
+    nudge that surfaces the *wrong* product costs the whole session's rank. The
+    ablation makes the point bluntly -- at the old weight of 30, removing BM25
+    outright *gained* 0.0113.
+
+    Deleting it would be the wrong lesson: BM25 is the route that still works
+    when the customer is paraphrased, and at weight 0 the score falls 0.065 at L3
+    and 0.068 at L4. 10 is not a compromise between the two, it beats weight 30
+    at *every* level measured -- L0 0.9623 -> 0.9692, L1 0.8810 -> 0.8895, L3
+    0.8522 -> 0.8533, L4 0.7392 -> 0.7467.
+    """
     prior_weight: float = 8.0
     profile_weight: float = 4.0
 

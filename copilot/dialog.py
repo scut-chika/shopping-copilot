@@ -193,8 +193,14 @@ class DialogParser:
             return
         chosen = llm.select_constraint(text, shortlist)
         if chosen and chosen in self.index.card_index:
-            # Full weight: unlike a mined guess this one was adjudicated.
-            state.add_constraint(chosen, known=True)
+            # Marked `mined`, i.e. down-weighted, even though a model adjudicated
+            # it. At full weight this measured *worse*: recall went up (hit rate
+            # +0.025 at L3, +0.050 at L4, so it really is recovering constraints)
+            # but MRR fell 0.17, because one wrong pick both tops a one-item list
+            # and collapses the candidate set below the gate's threshold, making
+            # the agent commit early to the wrong answer. An adjudicated guess is
+            # still a guess.
+            state.add_constraint(chosen, known=True, mined=True)
 
     def _mine(self, state: SessionState, text: str, config) -> None:
         """Template-independent salvage.
