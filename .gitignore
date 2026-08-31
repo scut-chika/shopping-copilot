@@ -36,3 +36,4 @@ catalog.jsonl.gz
 /gen_*.json
 /gp_*.json
 /holdout_*.jsonl
+/shopping-copilot-submission.zip

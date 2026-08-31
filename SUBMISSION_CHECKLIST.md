@@ -1,7 +1,7 @@
 # Submission checklist
 
 Checked against the Track 4 **Deliverables** section of the official problem
-statement, not from memory. Three deliverables; two are done.
+statement, not from memory. Three deliverables, all three complete.
 
 ## 1. Written Project Description (via Devpost) — ready to paste
 
@@ -30,14 +30,12 @@ Complete. Demo video linked: <https://youtu.be/sgenegmZxXo>
 | README: limitations and what we would improve | `README.md` → Limitations |
 | README: team member contributions | Not applicable — the list says *"if applicable, i.e. team participants, non-solo participants"*. Authorship is recorded anyway under Author. |
 
-## 3. Demo video — recorded, one step left
+## 3. Demo video — done
 
 <https://youtu.be/sgenegmZxXo>
 
 - [x] demonstrates the solution working end to end
-- [x] uploaded to YouTube
-- [ ] **set to public visibility** — still private at time of writing. The rule is
-      *"set to public visibility"*, so "unlisted" does not satisfy it.
+- [x] uploaded to YouTube, set to public visibility
 - [x] linked in the Devpost description
 - [x] contains no third-party trademarks or copyrighted content
 
