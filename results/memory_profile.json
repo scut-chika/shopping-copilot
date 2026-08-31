@@ -5,12 +5,12 @@
     "use_profile": false,
     "use_constraint_mining": true
   },
-  "build_seconds": 18.05,
+  "build_seconds": 16.65,
   "rss_before_mb": 21.0,
-  "rss_after_mb": 205.5,
-  "rss_peak_mb": 206.5,
-  "index_growth_mb": 184.5,
-  "traced_peak_mb": 50.5,
+  "rss_after_mb": 205.9,
+  "rss_peak_mb": 206.9,
+  "index_growth_mb": 184.9,
+  "traced_peak_mb": 50.4,
   "products_indexed": 50000,
   "distinct_constraints": 60670
 }

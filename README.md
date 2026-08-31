@@ -486,6 +486,10 @@ clean-set cost entirely:
 | **after (16 results, weight 0.35)** | **0.9189** | **0.8435** | **0.8418** | **0.8172** | **0.7514** |
 | gain | +0.0029 | +0.0170 | +0.0213 | +0.0384 | +0.0436 |
 
+(Measured at the configuration of the time. The absolute figures are lower than
+the current table above because the confidence gate did not exist yet; the
+comparison between the two rows is the point, and it was taken in one sitting.)
+
 32 results was indistinguishable from 16, so 16 is the knee. Per-turn latency was
 unaffected, because mining only runs on turns where template parsing recovered
 nothing.
@@ -506,11 +510,11 @@ widening from H3 is not in the shipped config because it buys nothing.
 | Network access required | **no** | no |
 | API cost | **$0.00** | $0.00 |
 | Token usage | 0 prompt / 0 completion | 0 / 0 |
-| Index build | **18.1 s** | 26.5 s |
-| Python heap (tracemalloc peak) | **50.5 MB** | 306.6 MB |
-| Process RSS after build | **205 MB** | — |
-| Per-turn latency, mean | 64 ms | 66 ms |
-| Per-turn latency, p95 / p99 | 123 / 145 ms | 127 / 154 ms |
+| Index build | **16.7 s** | 26.5 s |
+| Python heap (tracemalloc peak) | **50.4 MB** | 306.6 MB |
+| Process RSS after build | **206 MB** | — |
+| Per-turn latency, mean | 66 ms | 66 ms |
+| Per-turn latency, p95 / p99 | 117 / 149 ms | 127 / 154 ms |
 
 Both columns were measured back to back in isolated processes on the same
 machine, because our first attempt at this table was wrong: earlier readings of
@@ -532,10 +536,15 @@ benefit, and the ablation confirms removing each is worth exactly +-0.0000:
 - the **loose index** (62 MB) - measured to contribute nothing at any
   perturbation level.
 
-Score after all three: **0.918872**, unchanged. **Heap fell 6.1x and build time
-1.5x; per-turn latency did not move**, which in hindsight is the expected result:
-the removed structures were never read during a turn, so dropping them frees
-memory without shortening the request path.
+Score at the time: **0.918872**, unchanged by all three. **Heap fell 6.1x and
+build time 1.5x; per-turn latency did not move**, which in hindsight is the
+expected result: the removed structures were never read during a turn, so
+dropping them frees memory without shortening the request path.
+
+The shipped column was re-measured after the confidence gate, replay consistency,
+and the optional LLM module landed. None of them moved it: latency is flat within
+noise and the heap is unchanged, because all three work on a candidate list that
+was already in memory.
 
 The gap between the 205 MB RSS and the 50.5 MB Python heap is the two in-memory
 SQLite FTS5 indexes, which SQLite allocates in C where `tracemalloc` cannot see
@@ -618,9 +627,11 @@ copilot/
   simulator_model.py   reconstruction of the organizer's utterance derivation
   catalog.py           catalog load, inverted indexes, both FTS5 indexes
   dialog.py            utterance parsing, constraint mining, session state
+  replay.py            replaying the dialogue against a candidate
   retrieval.py         multi-route retrieval and fusion
-  questions.py         expected-information-gain question selection
-  agent.py             per-turn orchestration
+  questions.py         question selection, by information gain or convergence
+  agent.py             per-turn orchestration, including the confidence gate
+  llm.py               optional inbound paraphrase parsing; off, lazily imported
   config.py            every route and strategy behind a flag, for ablation
 starter/
   agent.py             adapter exposing the required `Agent` interface
@@ -635,8 +646,8 @@ tools/
   demo.py              one verbose multi-turn session
   explore.py           the analysis that motivated the design
   explore2.py          candidate-narrowing measurement
-tests/                 16 tests: derivation parity, parsing, invariants,
-                       question estimation, offline contract
+tests/                 22 tests: derivation parity, parsing, invariants,
+                       question estimation, replay evidence, offline contract
 results/               raw output backing every table above
 RUN.md                 one-page reproduction guide
 ```
@@ -655,7 +666,7 @@ curl -L -o catalog.jsonl.gz \
 sha256sum -c --ignore-missing SHA256SUMS   # SHA256SUMS also lists the kit zip, which we do not need
 gzip -dk catalog.jsonl.gz && mv catalog.jsonl data/catalog.jsonl
 
-python -m evaluator.local_evaluator     # -> results.json, TechnicalScore 0.918872
+python -m evaluator.local_evaluator     # -> results.json, TechnicalScore 0.971714
 ```
 
 Python 3.10+, no third-party runtime dependencies.
