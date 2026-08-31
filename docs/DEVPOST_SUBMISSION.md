@@ -215,6 +215,38 @@ Two invariants that mattered more than any tuning:
   `ask_attribute` at all, which is why its MTTC is 9.81.
 - **Never raise.** An exception becomes an empty turn, wasting one of only ten.
 
+### Against the four pillars, including where we fall short
+
+The statement names four things. Two we do well, one we do differently on
+purpose, and one we largely do not do — and we would rather say so than let a
+reader find the gaps.
+
+**Intent routing: done, but on the evidence rather than the label.** A buying
+session discloses a hard constraint on turn 1 and a browsing one does not, and
+retrieval and the gate already respond to that. We tested whether the scenario
+label adds anything beyond it, on the strongest case we could construct, and
+**MRR was identical to four decimal places** across every setting. The label
+carries no information the evidence had not already delivered.
+
+**Vector similarity: not implemented. The real gap.** The ablation says retrieval
+is not the bottleneck — reducing it to plain BM25 costs 0.0076, against 0.3318
+for removing the question policy — so a dense route would buy from the part that
+is already not the constraint, at the cost of the zero-dependency offline
+property. We would test it first with another day, and expect it to matter under
+paraphrase rather than on clean text.
+
+**Proactive guidance and retrieval cutoff: our largest component.** "Retrieval
+cutoff when facing Over-Generality" is exactly the confidence gate, worth
+−0.0578.
+
+**Self-evolution: our weakest pillar.** Long-term profile distillation is
+implemented and off, because the signal is real but the target is already ranked
+first in 194 of 200 sessions and it has nowhere to go. Adaptive orchestration
+exists — mining fires only on parse failure, the question estimator switches
+evidence sources when parsing degrades, the gate releases on collapse or on the
+turn budget — but these are conditional strategies, not the runtime workflow
+re-orchestration the statement envisions.
+
 ### Challenges
 
 Deciding what to do when no configuration dominates. Constraint mining wins under

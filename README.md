@@ -316,6 +316,88 @@ reset(session_id, profile)
   `test_never_raises_on_hostile_input` covers empty, oversized, binary, and
   FTS5-injection inputs.
 
+## Against the four pillars
+
+The problem statement asks for four things by name. Two we do well, one we do
+differently on purpose, and one we largely do not do. Setting that out ourselves
+seems better than leaving a reader to find the gaps.
+
+### I. Intent routing and a hybrid pipeline
+
+**Dual-track routing — done, but on the evidence rather than the label.** The
+scenario is detected on turn 1 (`dialog.py`), and for a long time nothing read it
+again: a buying session discloses a hard constraint immediately and a browsing
+one does not, and both retrieval and the confidence gate already respond to that
+difference. The obvious objection is that the label must carry *something*
+extra, so we tested the strongest case for it. An intent-override session cannot
+convert until the override lands on turn 3 or 4, so its efficiency floor is
+already paid and holding back longer ought to be nearly free — and it is our
+weakest track by MRR. Extending the gate for that track alone, across horizons 3
+to 8, left **MRR identical to four decimal places** while MTTC crept upward.
+Those sessions have already collapsed to one candidate by the time the override
+lands. The label carries no information the evidence had not already delivered,
+and `use_scenario_routing` keeps that measurable.
+
+**Multi-route retrieval — three of the four named routes.** Card-exact, coarse
+category, and BM25 over the accumulated dialog, fused additively (a fourth,
+loose text matching, is implemented and measured to contribute nothing).
+
+**Vector similarity — not implemented.** The honest gap. Two reasons, one good
+and one merely convenient. The good one: the ablation says retrieval is not the
+bottleneck — reducing it to plain BM25 costs **0.0076**, against **0.3318** for
+removing the question policy. Adding a dense route would buy from the part of the
+system that is already not the constraint. The convenient one: it would cost the
+zero-dependency, offline-by-construction property that the network-restriction
+rule makes valuable. We would test it first if we had another day, and we would
+expect it to matter under paraphrase rather than on clean text.
+
+**LLM semantic ranking — implemented, measured, switched off.** See
+[the LLM section](#the-optional-llm-stage-and-why-it-is-off) for what it does,
+what it measured, and why it is not in the scored path.
+
+### II. Dialog strategy
+
+**Information accumulation — done.** Constraints accumulate across turns, and
+every answer is also replayed against each candidate, so what the customer
+*declined* to say narrows the field too.
+
+**Intent override — deliberately not slot erasure.** The statement asks for
+erasure and rewriting. The evaluator takes both the old and the new value from
+the *same* product's intent card and never changes `parent_asin`, so erasing
+would discard valid evidence about the target. We accumulate and re-weight, and
+pin the decision with a test. If a private simulator genuinely switches targets
+mid-session this is wrong, and the [limitations](#limitations-and-what-we-would-do-next)
+say what we would build to detect it.
+
+**Proactive guidance and retrieval cutoff — this is our largest component.**
+"Trigger an immediate retrieval cutoff when facing Over-Generality (candidate
+pool overload)" is exactly what the confidence gate does, and removing it costs
+**−0.0578**, more than every retrieval route combined.
+
+### III. Self-evolution and dynamic context programming
+
+**This is our weakest pillar, and the weakness is deliberate in one place and
+real in the other.**
+
+*Deliberate:* personalized context distillation over the long-term profile is
+implemented and off. The tags carry genuine signal — a target's overlap averages
+0.371 against 0.237 for its category peers — but the target is already ranked
+first in 194 of 200 sessions, so the signal has nowhere to go and costs 0.0052.
+
+*Real:* adaptive orchestration exists but is modest. The runtime does re-route
+itself — mining fires only when template parsing recovered nothing, the question
+estimator switches which "already disclosed" set it reasons from when parses
+start failing, the gate releases when the candidate set collapses or the turn
+budget runs short — but these are conditional strategies, not the runtime
+workflow re-orchestration the statement envisions.
+
+### IV. Evaluation matrix
+
+Coverage, precision, and efficiency are the three metrics, and the
+[results](#results) and [held-out](#does-it-generalize-or-did-we-fit-200-sessions)
+sections report all of them, by scenario, with the raw output committed under
+`results/`.
+
 ## Ablation
 
 `python tools/ablation.py` → `results/ablation.json`. One setting changed at a

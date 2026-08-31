@@ -160,6 +160,9 @@ class Config:
     measurement, and it is where we stopped.
     """
 
+    gate_max_turn_override: int = 5
+    """`gate_max_turn` for intent-override sessions, which convert late anyway."""
+
     gate_needs_clean_parse: bool = False
     """Stop gating once a turn fails to parse as a known template.
 
@@ -174,6 +177,29 @@ class Config:
     fell from 0.8329 to 0.6929. Even on a half-read transcript the ranking is
     good enough that committing to one guess beats padding out ten, so the gate
     earns its keep exactly where it looked most dangerous.
+    """
+
+    use_scenario_routing: bool = False
+    """Let the detected scenario, not just the evidence, change the strategy.
+
+    A falsified hypothesis, kept because the result answers a question about the
+    design. The scenario is detected on turn 1 and, before this flag existed, was
+    never read again -- routing happened on the *evidence* instead: a buying
+    session discloses a constraint on turn 1 and a browsing one does not, and
+    both retrieval and the gate react to that without needing the label.
+
+    The obvious objection is that the label must carry something the evidence
+    does not. The best candidate was a scoring asymmetry rather than a semantic
+    one: an intent-override session cannot convert until the override lands on
+    turn 3 or 4, so its MTTC floor is already paid and holding back longer should
+    be nearly free -- and it is also our weakest scenario by MRR.
+
+    Measured across gate horizons 3, 4, 5, 6 and 8 for that track alone, MRR is
+    **identical to four decimal places (0.9790) at every horizon** while MTTC
+    creeps from 2.100 to 2.125. Extending the gate buys nothing, because those
+    sessions have already collapsed to a single candidate by the time the
+    override lands -- the gate releases on its own. The label carries no
+    information the evidence had not already delivered.
     """
 
     gate_max_turn: int = 3

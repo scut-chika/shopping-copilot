@@ -1,0 +1,82 @@
+[
+  {
+    "use_scenario_routing": false,
+    "gate_max_turn_override": 3,
+    "technical_score": 0.971714,
+    "hit_rate": 1.0,
+    "mrr": 0.979048,
+    "mttc": 2.1
+  },
+  {
+    "use_scenario_routing": false,
+    "gate_max_turn_override": 4,
+    "technical_score": 0.971714,
+    "hit_rate": 1.0,
+    "mrr": 0.979048,
+    "mttc": 2.1
+  },
+  {
+    "use_scenario_routing": false,
+    "gate_max_turn_override": 5,
+    "technical_score": 0.971714,
+    "hit_rate": 1.0,
+    "mrr": 0.979048,
+    "mttc": 2.1
+  },
+  {
+    "use_scenario_routing": false,
+    "gate_max_turn_override": 6,
+    "technical_score": 0.971714,
+    "hit_rate": 1.0,
+    "mrr": 0.979048,
+    "mttc": 2.1
+  },
+  {
+    "use_scenario_routing": false,
+    "gate_max_turn_override": 8,
+    "technical_score": 0.971714,
+    "hit_rate": 1.0,
+    "mrr": 0.979048,
+    "mttc": 2.1
+  },
+  {
+    "use_scenario_routing": true,
+    "gate_max_turn_override": 3,
+    "technical_score": 0.971714,
+    "hit_rate": 1.0,
+    "mrr": 0.979048,
+    "mttc": 2.1
+  },
+  {
+    "use_scenario_routing": true,
+    "gate_max_turn_override": 4,
+    "technical_score": 0.971614,
+    "hit_rate": 1.0,
+    "mrr": 0.979048,
+    "mttc": 2.105
+  },
+  {
+    "use_scenario_routing": true,
+    "gate_max_turn_override": 5,
+    "technical_score": 0.971487,
+    "hit_rate": 1.0,
+    "mrr": 0.978958,
+    "mttc": 2.11
+  },
+  {
+    "use_scenario_routing": true,
+    "gate_max_turn_override": 6,
+    "technical_score": 0.971387,
+    "hit_rate": 1.0,
+    "mrr": 0.978958,
+    "mttc": 2.115
+  },
+  {
+    "use_scenario_routing": true,
+    "gate_max_turn_override": 8,
+    "technical_score": 0.971187,
+    "hit_rate": 1.0,
+    "mrr": 0.978958,
+    "mttc": 2.125
+  }
+]

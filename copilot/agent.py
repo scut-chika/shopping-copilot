@@ -128,6 +128,18 @@ class ShoppingCopilot:
         ordered = self._llm().rerank(state.dialog_text(), described)
         return (ordered or deep)[:top_k]
 
+    def _gate_horizon(self, state: SessionState) -> int:
+        """How long this track is willing to hold back.
+
+        An intent-override session cannot register a hit until the override
+        lands, so the turns before that are already spent whatever we do. Holding
+        back longer there buys rank at a discount the other tracks do not get.
+        """
+        config = self.config
+        if config.use_scenario_routing and state.scenario == "intent_override":
+            return config.gate_max_turn_override
+        return config.gate_max_turn
+
     def _gate(self, state: SessionState, recommendations: list[str], candidates, turn: int) -> list[str]:
         """Shorten the list while the candidate pool is still overloaded.
 
@@ -142,7 +154,7 @@ class ShoppingCopilot:
         config = self.config
         if not config.use_confidence_gate:
             return recommendations
-        if turn > config.gate_max_turn:
+        if turn > self._gate_horizon(state):
             return recommendations
         if config.gate_needs_clean_parse and state.parse_failures:
             # We are not following this conversation. Holding back the list is
