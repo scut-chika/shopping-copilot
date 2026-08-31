@@ -9,7 +9,7 @@ Devpost description. No third-party trademarks or copyrighted music.
 
 **Setup before recording**
 - Terminal at ~110×32, large readable font, light or dark but high contrast.
-- Pre-warm: run each command once first so the 32 s index build is not on camera
+- Pre-warm: run each command once first so the ~17 s index build is not on camera
   (or cut it — see Shot 2).
 - Have `results/` open in a second tab for the numbers.
 
@@ -39,18 +39,20 @@ python tools/demo.py --scenario browsing --index 1
 
 > "Turn one. The customer has given us nothing but a category — five hundred and
 > thirty-four candidates are still consistent. So instead of guessing, the agent
-> asks the question that splits that set best.
+> asks the question that most likely leaves exactly one.
 >
-> The customer answers with two constraints. Turn two: three candidates left, and
-> the target is at rank one.
+> And watch what it *doesn't* do. It doesn't pad out ten recommendations to
+> improve its odds. It shows one — its single best guess — and asks.
 >
-> Two turns. And notice it returned ten recommendations on *both* turns — the
-> evaluator checks for a hit before it generates the reply, so answering with a
-> question alone is pure waste. The baseline never asks anything at all, which is
-> exactly why it takes nine point eight turns."
+> Because a hit ends the session at whatever rank it landed on. Getting lucky on
+> turn one at rank eight isn't a win; it books rank eight forever and denies you
+> the turn that would have made it rank one. Deferring costs two hundredths of the
+> efficiency score and buys up to three tenths of MRR. Thirteen to one.
+>
+> Turn two: one candidate left. Now it commits — full list, target at rank one."
 
-**Point at on screen:** the `candidates still consistent: 534` → `3` drop, and
-`<== TARGET` at rank 1.
+**Point at on screen:** the `candidates still consistent: 534` → `1` drop, the
+one-item list on turn 1, and `<== TARGET` at rank 1 on turn 2.
 
 ---
 
@@ -70,9 +72,11 @@ python tools/demo.py --scenario browsing --index 1
 **Then cut to the ablation table.**
 
 > "But here's the part that surprised us. We assumed that index was the story. It
-> isn't. Remove the question policy and we lose zero point four eight. Remove the
-> exact-match index and we lose zero point one. Asking the right question is worth
-> five times more than retrieving better."
+> isn't. Remove the question policy and we lose a third of the score. Remove the
+> confidence gate — the refusing-to-answer part — and we lose six hundredths.
+> Remove the exact-match index, the insight we started from, and we lose six
+> ten-thousandths. Knowing what to ask, and knowing when not to answer, is worth
+> a hundred times more than retrieving better."
 
 ---
 
@@ -93,8 +97,10 @@ python tools/demo.py --scenario browsing --index 1
 python tools/generalize.py --sessions 800
 ```
 
-> "Ninety-six point seven percent retained. Second seed, ninety-five point five.
-> We fit the task, not the sessions."
+> "Zero point nine three, against zero point nine seven on the public set. Second
+> seed agrees. So if you want one number for how this does on data we can't see,
+> it's zero point nine three — and we'd rather say that than quote the public
+> figure and let you read it as a forecast."
 
 **Then flash the robustness table.**
 
@@ -111,12 +117,18 @@ python tools/generalize.py --sessions 800
 python -m pytest tests/ -q
 ```
 
-> "The rules say final scoring may run with network access disabled. So there's no
-> model here. No API, no credentials, no third-party dependency — standard library
-> only. Zero tokens, zero dollars, eighty milliseconds a turn.
+> "The rules say final scoring may run with network access disabled. So the scored
+> configuration has no model in it. No API, no credentials, no third-party
+> dependency — standard library only. Zero tokens, zero dollars, sixty-six
+> milliseconds a turn.
 >
-> And that's not a claim in a README. One of these sixteen tests parses every
-> shipped module and fails if a network client ever appears.
+> There *is* an LLM stage. It reads paraphrased customer messages back onto
+> catalog constraints, we measured it against DeepSeek, and it's switched off —
+> because official scoring may cut the network, and because a call takes seconds
+> against a sixty-millisecond turn.
+>
+> And 'no model' isn't a claim in a README. One of these twenty-two tests starts a
+> fresh interpreter and fails if the network module is even *imported*.
 >
 > Shopping Copilot. Two turns instead of ten."
 
