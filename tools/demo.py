@@ -17,7 +17,8 @@ import sys
 import uuid
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 
 from copilot.agent import ShoppingCopilot  # noqa: E402
 from copilot.retrieval import candidate_set  # noqa: E402
@@ -46,8 +47,8 @@ def main() -> None:
     parser.add_argument("--scenario", default="buying",
                         choices=["buying", "browsing", "intent_override", "boundary"])
     parser.add_argument("--index", type=int, default=0)
-    parser.add_argument("--catalog", default="data/catalog.jsonl")
-    parser.add_argument("--dataset", default="data/public_set.jsonl")
+    parser.add_argument("--catalog", default=str(ROOT / "data" / "catalog.jsonl"))
+    parser.add_argument("--dataset", default=str(ROOT / "data" / "public_set.jsonl"))
     args = parser.parse_args()
 
     samples = load_samples(args.dataset)

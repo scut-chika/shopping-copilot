@@ -168,8 +168,10 @@ def main():
     parser.add_argument("--scenario", default="browsing",
                         choices=["buying", "browsing", "intent_override", "boundary"])
     parser.add_argument("--index", type=int, default=1)
-    parser.add_argument("--catalog", default="data/catalog.jsonl")
-    parser.add_argument("--dataset", default="data/public_set.jsonl")
+    # Resolved against the repository, not the shell's working directory: this
+    # is the one tool someone runs while a screen recorder is already going.
+    parser.add_argument("--catalog", default=str(ROOT / "data" / "catalog.jsonl"))
+    parser.add_argument("--dataset", default=str(ROOT / "data" / "public_set.jsonl"))
     args = parser.parse_args()
 
     print("Building the index. This is the part to keep off camera...", flush=True)
