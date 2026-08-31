@@ -49,10 +49,16 @@ python tools/demo.py --scenario browsing --index 1
 > the turn that would have made it rank one. Deferring costs two hundredths of the
 > efficiency score and buys up to three tenths of MRR. Thirteen to one.
 >
-> Turn two: one candidate left. Now it commits — full list, target at rank one."
+> The customer answers with two constraints. Turn two: five hundred and
+> thirty-four candidates down to three — and the one it puts up is the right one.
+> Rank one, turn two."
 
-**Point at on screen:** the `candidates still consistent: 534` → `1` drop, the
-one-item list on turn 1, and `<== TARGET` at rank 1 on turn 2.
+**Point at on screen:** the `candidates still consistent: 534` → `3` drop, and
+that the list under `top 3` has exactly *one* row on both turns — that is the
+gate, visible. `<== TARGET` lands on turn 2.
+
+*(Verified against `python tools/demo.py --scenario browsing --index 1`. If you
+record a different session, re-check these numbers before narrating them.)*
 
 ---
 
