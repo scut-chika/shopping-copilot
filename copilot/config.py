@@ -74,8 +74,11 @@ class Config:
     recall (candidate pool 60 -> 300) changed the end score by nothing. What it
     really provides is an aggregate boost to products whose card text overlaps
     the turn, so the useful quantity is total evidence, not the single best
-    guess. Widening to 16 gained +0.017 to +0.038 at every paraphrase level;
-    32 was indistinguishable from 16, so this is the knee.
+    guess. Widening to 16 gained +0.017 to +0.038 at every paraphrase level when
+    that change was measured; 32 was indistinguishable from 16, so this is the
+    knee. Mining as a whole is worth far more now than it was then -- +0.14 at L1
+    through L3 -- because cutting `bm25_weight` removed the lexical route that had
+    been covering for its absence.
     """
 
     mined_weight_factor: float = 0.35
@@ -250,9 +253,13 @@ class Config:
 
     Deleting it would be the wrong lesson: BM25 is the route that still works
     when the customer is paraphrased, and at weight 0 the score falls 0.065 at L3
-    and 0.068 at L4. 10 is not a compromise between the two, it beats weight 30
-    at *every* level measured -- L0 0.9623 -> 0.9692, L1 0.8810 -> 0.8895, L3
-    0.8522 -> 0.8533, L4 0.7392 -> 0.7467.
+    and 0.068 at L4.
+
+    5 is not a compromise between the two. Swept over {0, 2, 3, 5, 7, 10, 20, 30}
+    against all five paraphrase levels, it beats the old weight of 30 at *every*
+    level -- L0 0.9623 -> 0.9717, L1 0.8810 -> 0.9052, L3 0.8522 -> 0.8755, L4
+    0.7392 -> 0.7678 -- and beats 3, 7, 10 and 20 at every level too. Weight 0
+    wins only on clean text and collapses under paraphrase.
     """
     prior_weight: float = 8.0
     profile_weight: float = 4.0

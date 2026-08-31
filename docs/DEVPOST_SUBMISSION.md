@@ -168,9 +168,9 @@ network client or third-party package ever appears.
 | Model | none |
 | API cost | **$0.00** |
 | Token usage | 0 prompt / 0 completion |
-| Index build | 16.3 s once, for 50,000 products |
+| Index build | 16.7 s once, for 50,000 products |
 | Per-turn latency | mean 66 ms, p99 149 ms |
-| Process RSS | 205 MB, in-process |
+| Process RSS | 206 MB, in-process |
 
 **There is a real LLM stage, and it is off.** `copilot/llm.py` maps a
 *paraphrased customer utterance* back onto the catalog constraint that produced

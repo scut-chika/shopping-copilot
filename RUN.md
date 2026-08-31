@@ -65,14 +65,16 @@ carries a secret.
 
 The rules reserve the right to score "under CPU, memory, timeout, and network
 restrictions", so these are measured, not estimated. Over 410 turns on the public
-set (`results/cost_profile.json`, `results/memory_profile.json`):
+set (`results/cost_profile.json`, `results/memory_profile.json`). The two build
+figures are the same operation timed by two different tools, quoted separately
+rather than averaged into a number neither of them produced:
 
 | | |
 |---|---|
-| Index build (once per process) | **16.3 s** |
+| Index build (once per process) | **16.3 s** (`profile_cost.py`) / **16.7 s** (`memcheck.py`) |
 | Per-turn latency | mean 66 ms, p50 64 ms, p95 117 ms, p99 149 ms |
-| Process RSS after index build | **205 MB** |
-| Python heap (tracemalloc peak) | **50.5 MB** |
+| Process RSS after index build | **206 MB** |
+| Python heap (tracemalloc peak) | **50.4 MB** |
 | LLM calls / tokens / cost | 0 / 0 / **$0.00** |
 | Network | none required |
 

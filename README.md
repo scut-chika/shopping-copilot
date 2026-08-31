@@ -1,9 +1,22 @@
 # Shopping Copilot — TikTok TechJam 2026, Track 4
 
 A multi-turn shopping agent for the Conversational E-Commerce Search challenge.
-It finds a customer's hidden target product in a 50,000-item Amazon catalog by
-combining constraint-driven retrieval with a question-selection policy that asks
-whichever clarification is expected to disambiguate the most candidates.
+It finds a customer's hidden target product in a 50,000-item Amazon catalog in
+about two turns, and two ideas carry almost all of that:
+
+1. **Ask the question most likely to leave exactly one candidate.** The
+   simulator's reply rule is public and deterministic, so the value of a question
+   is computable rather than guessable. Removing this costs **−0.3318**.
+2. **Refuse to answer until it has one.** A hit ends the session at whatever rank
+   it landed on, so converting while still guessing books a bad rank forever.
+   Until the dialogue leaves a single candidate the agent returns its one best
+   guess plus the question, not ten it knows are wrong. Removing this costs
+   **−0.0578** — more than every retrieval route put together.
+
+**TechnicalScore 0.9717** on the official evaluator, against 0.1067 for the
+organizer's baseline. Our own estimate for the private set is **0.930**, and the
+[held-out section](#does-it-generalize-or-did-we-fit-200-sessions) explains why
+we quote that number rather than the public one.
 
 **The scored configuration uses no LLM, makes no network call, has no
 third-party dependencies, and runs on CPU for $0.00.** An LLM stage exists and is
@@ -382,9 +395,10 @@ Things we changed because of this table, not because they sounded good:
   sessions, so a cue that is right two times in three disturbs more correct
   rankings than it repairs. Restricting it to undecided tiers only recovers
   0.0009 of the 0.0052. The flag stays; the explanation is corrected.
-- **Constraint mining is free here** (±0.0000) and worth up to +0.039 under
-  paraphrase. It used to cost 0.0029; understanding what it actually does removed
-  that cost. See [What constraint mining actually does](#what-constraint-mining-actually-does).
+- **Constraint mining is free here** (+0.0001, i.e. nothing) and worth **+0.14**
+  under paraphrase — by far the largest gap between what a component looks like on
+  clean data and what it is actually holding up. See
+  [What constraint mining actually does](#what-constraint-mining-actually-does).
 - **The loose index is off by default: it contributes literally nothing.**
   Identical scores to four decimal places on the clean set *and* at all five
   paraphrase levels, for ~62 MB of heap. It was a plausible fallback for
@@ -403,19 +417,28 @@ correctness"*). That is the most likely way a verbatim-matching route fails to
 transfer, so we measured the exposure. `tools/robustness.py` replays the official
 protocol while rewriting every customer utterance:
 
-| Level | Perturbation | Shipped | Previous version |
-|---|---|---|---|
-| L0 | official wording | **0.9717** | 0.9189 |
-| L1 | every template reworded, constraints verbatim | **0.9052** | 0.8435 |
-| L2 | L1 + surface edits (case, punctuation) | **0.9023** | 0.8418 |
-| L3 | L1 + 25% of constraint words dropped | **0.8755** | 0.8172 |
-| L4 | L1 + 40% dropped and word order shuffled | **0.7678** | 0.7514 |
+| Level | Perturbation | Shipped | Mining off | Previous version |
+|---|---|---|---|---|
+| L0 | official wording | **0.9717** | 0.9718 | 0.9189 |
+| L1 | every template reworded, constraints verbatim | **0.9052** | 0.7657 | 0.8435 |
+| L2 | L1 + surface edits (case, punctuation) | **0.9023** | 0.7655 | 0.8418 |
+| L3 | L1 + 25% of constraint words dropped | **0.8755** | 0.7403 | 0.8172 |
+| L4 | L1 + 40% dropped and word order shuffled | **0.7678** | 0.7151 | 0.7514 |
 
 **The parser was the weak link, not the matching.** An early version lost more
 score from rewording the templates alone (L0→L1, −0.166) than from heavily
 paraphrasing the constraints inside them. That was not the failure mode we
 expected. Constraint mining — recovering constraints by token overlap rather than
-template match — closes about half that gap.
+template match — is what closes it.
+
+**Mining became far more load-bearing than it used to be, and we only found out
+by re-running the A/B.** It is worth **+0.14** at L1 through L3 now, against
++0.017 to +0.039 when it was last measured, and it no longer loses at L4 — it
+wins there by 0.053. The cause is a change made for an unrelated reason: cutting
+`bm25_weight` from 30 to 5 removed the lexical route that had been quietly
+covering for mining's absence. Two components that each looked marginal were
+partly substituting for each other, and the ablation only shows that if you
+re-measure the old A/B after changing the other one.
 
 **L4 was a regression for most of a day, and the fix came from the ablation.**
 The confidence gate costs 0.005 at L4 and the convergence objective about 0.004,
@@ -494,9 +517,10 @@ index reaches them where a direct card-text index cannot. If the signal is
 aggregate, the useful quantity is total evidence rather than the single best
 guess — so admit many weak constraints instead of few confident ones.
 
-That prediction held. Widening `mining_max_results` from 4 to 16 and cutting
-`mined_weight_factor` from 0.6 to 0.35 gained at every level, and removed the
-clean-set cost entirely:
+That prediction held, and has held up better since. Widening
+`mining_max_results` from 4 to 16 and cutting `mined_weight_factor` from 0.6 to
+0.35 gained at every level and removed the clean-set cost entirely. Measured at
+the time:
 
 | | L0 | L1 | L2 | L3 | L4 |
 |---|---|---|---|---|---|
@@ -528,10 +552,10 @@ widening from H3 is not in the shipped config because it buys nothing.
 | Network access required | **no** | no |
 | API cost | **$0.00** | $0.00 |
 | Token usage | 0 prompt / 0 completion | 0 / 0 |
-| Index build | **16.7 s** | 26.5 s |
+| Index build (`memcheck.py`) | **16.7 s** | 26.5 s |
 | Python heap (tracemalloc peak) | **50.4 MB** | 306.6 MB |
 | Process RSS after build | **206 MB** | — |
-| Per-turn latency, mean | 66 ms | 66 ms |
+| Per-turn latency, mean (`profile_cost.py`) | 66 ms | 66 ms |
 | Per-turn latency, p95 / p99 | 117 / 149 ms | 127 / 154 ms |
 
 Both columns were measured back to back in isolated processes on the same
@@ -564,7 +588,7 @@ and the optional LLM module landed. None of them moved it: latency is flat withi
 noise and the heap is unchanged, because all three work on a candidate list that
 was already in memory.
 
-The gap between the 205 MB RSS and the 50.5 MB Python heap is the two in-memory
+The gap between the 206 MB RSS and the 50.4 MB Python heap is the two in-memory
 SQLite FTS5 indexes, which SQLite allocates in C where `tracemalloc` cannot see
 them. RSS is the number that matters against a memory cap, and it is the one we
 report.
