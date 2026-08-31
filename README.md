@@ -858,13 +858,9 @@ Python 3.10+, no third-party runtime dependencies.
 
 A solo submission. Every part of this project — reading the evaluator, the
 retrieval design, the question policy, the confidence gate, the generalization
-and robustness harnesses, and the write-up — is the work of one person, which is
-also why the honest-reporting discipline in this README matters: there was no
-second reviewer to catch a number that was measured badly. Two such errors were
-caught and are documented rather than quietly fixed (the resource-table
-comparison, and the `user_profile` explanation).
+and robustness harnesses, and the write-up — is the work of one person.
 
-Track 4 — Shopping Copilot: AI Conversational Search and Recommendations.
+Shopping Copilot: AI Conversational Search and Recommendations.
 TikTok TechJam 2026.
 
 ## Attribution
