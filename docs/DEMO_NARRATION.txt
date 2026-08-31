@@ -1,0 +1,105 @@
+DEMO VIDEO NARRATION — paste-ready for text-to-speech
+=====================================================
+
+Five blocks, about 3 minutes total at a normal reading pace.
+
+HOW TO USE THIS FILE
+  Paste ONE block at a time into your TTS tool. Do not paste the ==== header
+  lines or the [ ] direction lines — those are for you, not the voice.
+  Exact figures stay on screen in the terminal; the narration rounds them so
+  they read naturally out loud.
+
+
+==== BLOCK 1 — opening, about 20 seconds ====
+[ on screen: the score table from tools/record.py ]
+
+A customer says: I'm looking for tunics, but I'm still exploring. There are
+fifty thousand products in the catalog. You have ten turns to put the one item
+they actually want into your top ten.
+
+The organizer's baseline manages that twelve percent of the time, and burns
+almost all ten turns doing it. This system finds it every single time, in about
+two turns, and ranks it first in one hundred ninety four sessions out of two
+hundred.
+
+
+==== BLOCK 2 — the live session, about 55 seconds ====
+[ on screen: the turn-by-turn session. Pause on the one-item list. ]
+
+Here is a real session. The agent has never seen the target.
+
+Turn one. The customer has given it nothing but a category, so five hundred and
+thirty four products are still consistent with what it knows. And watch what it
+does not do. It does not fill ten slots to improve its odds. It shows one
+product, its single best guess, and asks a question.
+
+That is deliberate, and it is where most of the score comes from. The evaluator
+ends the session the moment the target appears, at whatever rank it landed on.
+Getting lucky on turn one at rank eight is not a win. It locks in rank eight
+forever, and throws away the turn that would have made it rank one. Waiting one
+more turn costs two percent of the efficiency score and buys up to thirty
+percent of the ranking score. Thirteen to one.
+
+Turn two. The customer answers, five hundred and thirty four candidates collapse
+to three, and the product it puts up is the right one. Rank one, turn two.
+
+
+==== BLOCK 3 — where the score comes from, about 40 seconds ====
+[ on screen: the ablation table ]
+
+We assumed the clever part would be the retrieval. It isn't.
+
+Every customer sentence is built, word for word, from the target product's own
+catalog record. So the right index is not a vector store. It is an inverted
+index, from the thing the customer said back to the products that could have
+said it.
+
+But turn that off and the score barely moves. Turn off the question policy and a
+third of the score disappears. Turn off the part that refuses to answer while
+it is still guessing, and six more points go with it. Knowing what to ask, and
+knowing when not to answer, is worth far more here than retrieving better.
+
+
+==== BLOCK 4 — the honest part, about 45 seconds ====
+[ on screen: the generalization table ]
+
+A perfect hit rate on two hundred sessions is a warning sign, not a victory lap.
+At the ceiling, that set cannot tell you anything anymore. You are just fitting
+it.
+
+So we built our own test. Eight hundred sessions, over products that appear
+nowhere in the public set, with independently resampled users, at the official
+scenario mix. Then we did it again with a second random seed.
+
+Zero point nine three, both times, against zero point nine seven on the public
+set.
+
+So if you want one number for how this performs on data it has never seen, it is
+zero point nine three, not zero point nine seven. We would rather tell you that
+than quote the public figure and let it be read as a forecast. The repository
+also names the one change that gained on the public set and gained nothing on
+held out data. We kept it, and we do not count it.
+
+
+==== BLOCK 5 — offline, about 25 seconds ====
+[ on screen: the cost table, then the repo URL ]
+
+The rules say final scoring may run with network access disabled. So the scored
+configuration has no model in it. No API, no credentials, no third party
+dependency, standard library only. Zero tokens, zero dollars, sixty six
+milliseconds per turn.
+
+There is an optional language model stage. It reads paraphrased customer
+messages back onto catalog constraints, we measured it against a real model, and
+it is switched off, because official scoring may cut the network.
+
+And no model is not a claim in a README. One test starts a fresh interpreter and
+fails if that module is so much as imported.
+
+Shopping Copilot. Two turns instead of ten.
+
+
+=====================================================
+WORD COUNT ~ 480. At a typical synthetic-voice pace that lands near three
+minutes. If you need it shorter, cut the second half of block four first — it is
+the most expendable, though it is also the most honest part.
