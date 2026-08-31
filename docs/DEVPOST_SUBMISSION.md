@@ -268,4 +268,9 @@ data was added.
 
 ## Team
 
-{{ TEAM_MEMBERS_AND_CONTRIBUTIONS }}
+**LONG HONGYU** — Nanyang Technological University
+hongyu021@e.ntu.edu.sg · github.com/scut-chika
+
+Solo submission; all work by one person. (The deliverables list asks for team
+member contributions "if applicable, i.e. team participants, non-solo
+participants".)

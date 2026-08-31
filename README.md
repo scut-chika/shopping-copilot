@@ -741,6 +741,22 @@ Python 3.10+, no third-party runtime dependencies.
   simulator spends the first question of a boundary session refusing to answer, so
   a turn is lost no matter what the agent asks.
 
+## Author
+
+**LONG HONGYU** — Nanyang Technological University
+<hongyu021@e.ntu.edu.sg> · [github.com/scut-chika](https://github.com/scut-chika)
+
+A solo submission. Every part of this project — reading the evaluator, the
+retrieval design, the question policy, the confidence gate, the generalization
+and robustness harnesses, and the write-up — is the work of one person, which is
+also why the honest-reporting discipline in this README matters: there was no
+second reviewer to catch a number that was measured badly. Two such errors were
+caught and are documented rather than quietly fixed (the resource-table
+comparison, and the `user_profile` explanation).
+
+Track 4 — Shopping Copilot: AI Conversational Search and Recommendations.
+TikTok TechJam 2026.
+
 ## Attribution
 
 Catalog and sessions derive from Amazon Reviews 2023 (McAuley Lab, UCSD) — see
